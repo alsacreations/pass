@@ -70,7 +70,8 @@
     { "m": "Moche", "f": "Moche" },
     { "m": "Tordu", "f": "Tordue" },
     { "m": "Minuscule", "f": "Minuscule" },
-    { "m": "Fragile", "f": "Fragile" },
+    { "m": "Inviolable", "f": "Inviolable" },
+    { "m": "Inutile", "f": "Inutile" },
     { "m": "Moqueur", "f": "Moqueuse" }
   ]
 }
