@@ -395,7 +395,6 @@ main {
     "controls"
     "strength";
   gap: 16px;
-  align-items: start;
 
   @media (width >= 64rem) {
     grid-template-columns: 1fr 1fr;
@@ -416,8 +415,35 @@ main {
   display: grid;
   gap: 1rem;
 }
-.strength {
+.strength-column {
   grid-area: strength;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (width >= 64rem) {
+    gap: 24px;
+  }
+}
+
+.highlight {
+  background: linear-gradient(135deg, #7b241c 0%, #c0392b 100%);
+  color: #ffffff;
+}
+
+.highlight h2 {
+  margin: 0 0 12px;
+  color: #ffffff;
+}
+
+.highlight p {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.highlight p:last-child {
+  margin-bottom: 0;
 }
 
 .accent {
@@ -722,7 +748,6 @@ input[type="text"]:focus {
 }
 
 .strength-time strong {
-  display: block;
   margin-top: 4px;
 }
 
