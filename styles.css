@@ -34,8 +34,11 @@ body {
 }
 
 main {
-  max-width: 1400px;
   margin-inline: auto;
+
+  @media (width >= 96rem) {
+    width: 1400px;
+  }
 }
 
 .page-grid {
