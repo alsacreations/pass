@@ -34,6 +34,8 @@ body {
 }
 
 main {
+  max-width: 1400px;
+  margin-inline: auto;
 }
 
 .page-grid {
@@ -47,10 +49,7 @@ main {
   align-items: start;
 
   @media (width >= 64rem) {
-    grid-template-columns: minmax(200px, 300px) minmax(480px, 1fr) minmax(
-        200px,
-        300px
-      );
+    grid-template-columns: 300px minmax(480px, 1fr) 300px;
     grid-template-areas: "controls main strength";
     gap: 32px;
   }
@@ -315,6 +314,7 @@ input[type="text"]:focus {
   justify-content: center;
   min-height: 4.5rem;
   padding: 0 8px;
+  text-wrap: balance;
 }
 
 .fun-fact-text {
@@ -323,6 +323,7 @@ input[type="text"]:focus {
   font-size: 1rem;
   line-height: 1.5;
   transition: opacity 0.3s ease;
+  text-wrap: balance;
 }
 
 .fun-fact-text.is-fading {
