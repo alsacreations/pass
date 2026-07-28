@@ -141,7 +141,7 @@
 
       <div class="page-grid">
         <section class="card controls">
-          <h2>Personnalisation</h2>
+          <h2 class="visually-hidden">Personnalisation</h2>
 
           <div class="control-group">
             <label
@@ -176,6 +176,34 @@
                 checked />
               <span>Caractère spécial</span>
             </label>
+          </div>
+
+          <div class="control-group">
+            <span class="label-row">Séparateur</span>
+            <div class="radio-group">
+              <label>
+                <input
+                  type="radio"
+                  name="separator"
+                  value=" "
+                  checked />
+                Espace
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="separator"
+                  value="-" />
+                Tiret
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="separator"
+                  value="_" />
+                Underscore
+              </label>
+            </div>
           </div>
 
           <details

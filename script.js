@@ -6,6 +6,7 @@ const ARTICLES = [
   { m: "Le", f: "La" },
   { m: "Un", f: "Une" },
   { m: "Mon", f: "Ma" },
+  { m: "Ton", f: "Ta" },
 ]
 
 // Le compteur "nombre de mots" (2-6) inclut l'article et le préfixe quand ils
@@ -30,6 +31,7 @@ const customWordInput = document.getElementById("customWordInput")
 const customGenderRadios = document.querySelectorAll(
   'input[name="customGender"]',
 )
+const separatorRadios = document.querySelectorAll('input[name="separator"]')
 const gaugeFill = document.getElementById("gaugeFill")
 const gaugeLabel = document.getElementById("gaugeLabel")
 const strengthTime = document.getElementById("strengthTime")
@@ -82,7 +84,7 @@ function pickCentralWord(options) {
 }
 
 function buildPhrase(options) {
-  const { count, digits, special } = options
+  const { count, digits, special, separator } = options
   const slots = SLOT_DISTRIBUTION[count]
 
   const word = pickCentralWord(options)
@@ -99,13 +101,13 @@ function buildPhrase(options) {
   if (slots.article) segments.push(pickOne(ARTICLES)[gender])
   segments.push(...prefixes, word.text, ...suffixes)
 
-  let phrase = segments.join("-")
+  let phrase = segments.join(separator)
 
-  if (digits) {
-    phrase += pickOne(wordData.numbers)
-  }
   if (special) {
     phrase += pickOne(SPECIAL_CHARS)
+  }
+  if (digits) {
+    phrase += pickOne(wordData.numbers)
   }
 
   return phrase
@@ -243,6 +245,9 @@ function readOptions() {
   const customGender = document.querySelector(
     'input[name="customGender"]:checked',
   ).value
+  const separator = document.querySelector(
+    'input[name="separator"]:checked',
+  ).value
 
   return {
     count: Number(countInput.value),
@@ -250,6 +255,7 @@ function readOptions() {
     special: specialInput.checked,
     customWord: customWordInput.value.trim(),
     customGender,
+    separator,
   }
 }
 
@@ -343,6 +349,7 @@ digitsInput.addEventListener("change", generateAll)
 specialInput.addEventListener("change", generateAll)
 customWordInput.addEventListener("input", generateAll)
 customGenderRadios.forEach((r) => r.addEventListener("change", generateAll))
+separatorRadios.forEach((r) => r.addEventListener("change", generateAll))
 regenerateBtn.addEventListener("click", generateAll)
 copyMainBtn.addEventListener("click", () =>
   copyToClipboard(phraseDisplay.textContent, copyMainBtn),
