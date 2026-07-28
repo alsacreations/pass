@@ -111,6 +111,11 @@
     { "m": "Chelou", "f": "Chelou" },
     { "m": "Cabossé", "f": "Cabossée" },
     { "m": "Bancal", "f": "Bancale" },
-    { "m": "Flapi", "f": "Flapie" }
+    { "m": "Flapi", "f": "Flapie" },
+    { "m": "Bleu", "f": "Bleue" },
+    { "m": "Doré", "f": "Dorée" },
+    { "m": "Doré", "f": "Dorée" },
+    { "m": "Rouillé", "f": "Rouillée" },
+    { "m": "Foncé", "f": "Foncée" }
   ]
 }
