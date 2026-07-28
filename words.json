@@ -95,11 +95,11 @@
     { "m": "Charmant", "f": "Charmante" },
     { "m": "Merveilleux", "f": "Merveilleuse" },
     { "m": "Mini", "f": "Mini" },
-    { "m": "Super", "f": "Super" },
-    { "m": "Flou", "f": "Floue" }
+    { "m": "Super", "f": "Super" }
   ],
   "suffixes": [
     { "m": "Poilu", "f": "Poilue" },
+    { "m": "Flou", "f": "Floue" },
     { "m": "Coquin", "f": "Coquine" },
     { "m": "Multicolore", "f": "Multicolore" },
     { "m": "Viril", "f": "Virile" },
@@ -139,6 +139,7 @@
     { "m": "Bleu", "f": "Bleue" },
     { "m": "Doré", "f": "Dorée" },
     { "m": "Gris", "f": "Grise" },
+    { "m": "Mauve", "f": "Mauve" },
     { "m": "Malaisant", "f": "Malaisante" },
     { "m": "Invisible", "f": "Invisible" },
     { "m": "Rouillé", "f": "Rouillée" },
