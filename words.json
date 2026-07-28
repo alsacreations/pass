@@ -47,7 +47,9 @@
     { "text": "Nez", "gender": "m" },
     { "text": "Nombril", "gender": "m" },
     { "text": "Fesse", "gender": "f" },
-    { "text": "Croûton", "gender": "m" },
+    { "text": "Technique", "gender": "f" },
+    { "text": "Mot", "gender": "m" },
+    { "text": "Truc", "gender": "m" },
     { "text": "Coucou", "gender": "m" }
   ],
   "prefixes": [
@@ -74,8 +76,8 @@
     { "m": "Joyeux", "f": "Joyeuse" },
     { "m": "Nul", "f": "Nulle" },
     { "m": "Terrible", "f": "Terrible" },
-    { "m": "Dodu", "f": "Dodue" },
-    { "m": "Chauve", "f": "Chauve" },
+    { "m": "Mini", "f": "Mini" },
+    { "m": "Super", "f": "Super" },
     { "m": "Flou", "f": "Floue" }
   ],
   "suffixes": [
@@ -100,7 +102,9 @@
     { "m": "Humide", "f": "Humide" },
     { "m": "Jaloux", "f": "Jalouse" },
     { "m": "Mou", "f": "Molle" },
+    { "m": "Incroyable", "f": "Incroyable" },
     { "m": "Moche", "f": "Moche" },
+    { "m": "Inutile", "f": "Inutile" },
     { "m": "Tordu", "f": "Tordue" },
     { "m": "Minuscule", "f": "Minuscule" },
     { "m": "Inviolable", "f": "Inviolable" },
@@ -109,7 +113,7 @@
     { "m": "Moqueur", "f": "Moqueuse" },
     { "m": "Zarbi", "f": "Zarbi" },
     { "m": "Chelou", "f": "Chelou" },
-    { "m": "Cabossé", "f": "Cabossée" },
+    { "m": "Roux", "f": "Rousse" },
     { "m": "Bancal", "f": "Bancale" },
     { "m": "Flapi", "f": "Flapie" },
     { "m": "Bleu", "f": "Bleue" },
