@@ -1,5 +1,6 @@
 :root {
   --bg: #eceef2;
+  --bg-end: #e2def9;
   --card-bg: #ffffff;
   --text: #1c1b2e;
   --muted: #6b7280;
@@ -9,8 +10,10 @@
   --radius: 20px;
   --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.06);
   --text-20: 1.25rem;
+  --text-32: 2rem;
   --text-48: 3rem;
   --text-60: 3.75rem;
+  --text-m: clamp(var(--text-20), 0.957rem + 1.3043vw, var(--text-32));
   --text-l: clamp(var(--text-20), 0.565rem + 3.0435vw, var(--text-48));
 }
 
@@ -23,7 +26,7 @@ body {
   align-content: space-between;
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
+  background: linear-gradient(135deg, var(--bg) 0%, var(--bg-end) 100%);
   color: var(--text);
   font-family: system-ui, sans-serif;
   padding: 20px 16px;
@@ -36,8 +39,8 @@ body {
 main {
   margin-inline: auto;
 
-  @media (width >= 96rem) {
-    width: 1400px;
+  @media (width >= 80rem) {
+    width: 1000px;
   }
 }
 
@@ -46,14 +49,13 @@ main {
   grid-template-columns: 1fr;
   grid-template-areas:
     "controls"
-    "main"
     "strength";
   gap: 16px;
   align-items: start;
 
   @media (width >= 64rem) {
-    grid-template-columns: 300px minmax(480px, 1fr) 300px;
-    grid-template-areas: "controls main strength";
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "controls strength";
     gap: 32px;
   }
 }
@@ -68,17 +70,20 @@ main {
 .controls {
   grid-area: controls;
 }
-.main-phrase {
-  grid-area: main;
-}
 .strength {
   grid-area: strength;
 }
 
+.accent {
+  color: var(--accent);
+}
+
 h1 {
-  font-size: 1.5rem;
-  margin: 0 0 6px;
-  color: var(--accent-dark);
+  font-size: var(--text-l);
+  font-weight: 800;
+  margin: 0 0 16px;
+  color: var(--text);
+  letter-spacing: -0.01em;
 }
 
 h2 {
@@ -86,10 +91,42 @@ h2 {
   margin: 0 0 16px;
 }
 
+.page-header {
+  margin-bottom: 24px;
+  text-align: center;
+
+  @media (width >= 64rem) {
+    margin-bottom: 32px;
+  }
+}
+
+.page-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: var(--accent-dark);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.page-eyebrow svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
 .subtitle {
-  margin: 0 0 28px;
+  max-width: 46ch;
+  margin: 0 auto 28px;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.page-header .subtitle {
+  margin-bottom: 0;
+  font-size: 1rem;
 }
 
 .control-group {
@@ -185,25 +222,41 @@ input[type="text"]:focus {
 }
 
 .main-phrase {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 24px;
-  min-height: 220px;
+  margin-bottom: 36px;
   text-align: center;
+
+  @media (width >= 64rem) {
+    margin-bottom: 52px;
+  }
 }
 
 .phrase-display {
-  font-size: 1.8rem;
+  font-size: var(--text-m);
   font-weight: 700;
-  letter-spacing: 0.02em;
   color: var(--text);
 }
 
 .phrase-actions {
+  position: absolute;
+  left: 50%;
+  bottom: -22px;
+  transform: translateX(-50%);
   display: flex;
-  gap: 12px;
+  gap: 4px;
+  background: var(--card-bg);
+  border-radius: 999px;
+  padding: 6px 8px;
+  box-shadow: var(--shadow);
+}
+
+.phrase-actions .btn {
+  flex-shrink: 0;
 }
 
 .btn {
@@ -212,6 +265,7 @@ input[type="text"]:focus {
   padding: 12px 24px;
   font-size: 0.95rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   transition:
     transform 0.05s ease,
@@ -242,6 +296,23 @@ input[type="text"]:focus {
 }
 
 .btn-outline.copied {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-subtle {
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 18px;
+  font-size: 0.85rem;
+}
+
+.btn-subtle:hover {
+  background: var(--border);
+  color: var(--accent-dark);
+}
+
+.btn-subtle.copied {
   background: var(--accent);
   color: #fff;
 }

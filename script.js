@@ -325,7 +325,7 @@ function restartAutoRotate() {
 function copyToClipboard(text, button) {
   navigator.clipboard.writeText(text).then(() => {
     const original = button.textContent
-    const wasOutline = button.classList.contains("btn-outline")
+    const wasOutline = button.classList.contains("btn-subtle")
     if (wasOutline) button.classList.add("copied")
     button.textContent = wasOutline ? "Copié !" : "✓"
     setTimeout(() => {

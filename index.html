@@ -41,14 +41,29 @@
       property="og:locale"
       content="fr_FR" />
     <meta
+      property="og:image"
+      content="https://pass.alsacreations.com/og-image.png" />
+    <meta
+      property="og:image:width"
+      content="1200" />
+    <meta
+      property="og:image:height"
+      content="630" />
+    <meta
+      property="og:image:alt"
+      content="Générateur de pass-phrases — mots de passe robustes et mémorisables" />
+    <meta
       name="twitter:card"
-      content="summary" />
+      content="summary_large_image" />
     <meta
       name="twitter:title"
       content="Générateur de pass-phrases" />
     <meta
       name="twitter:description"
       content="Créez des mots de passe robustes et mémorisables en un clic." />
+    <meta
+      name="twitter:image"
+      content="https://pass.alsacreations.com/og-image.png" />
 
     <link
       rel="stylesheet"
@@ -73,13 +88,60 @@
   </head>
   <body>
     <main>
+      <header class="page-header">
+        <p class="page-eyebrow">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true">
+            <rect
+              x="4"
+              y="10"
+              width="16"
+              height="10"
+              rx="2"
+              fill="currentColor" />
+            <path
+              d="M7 10V7a5 5 0 0 1 10 0v3"
+              stroke="currentColor"
+              stroke-width="2.4"
+              fill="none" />
+          </svg>
+          Générateur de pass-phrases
+        </p>
+        <h1>
+          Des mots de passe <span class="accent">robustes</span><br />et
+          mémorisables
+        </h1>
+        <p class="subtitle">
+          Chiffres, caractères spéciaux, mot personnalisé&#8239;: à vous de
+          choisir&#8239;!
+        </p>
+      </header>
+
+      <section class="card main-phrase">
+        <div
+          class="phrase-display"
+          id="phraseDisplay"></div>
+        <div class="phrase-actions">
+          <button
+            class="btn btn-subtle"
+            id="copyMainBtn"
+            type="button">
+            Copier
+          </button>
+          <button
+            class="btn btn-subtle"
+            id="regenerateBtn"
+            type="button">
+            Générer à nouveau
+          </button>
+        </div>
+      </section>
+
       <div class="page-grid">
         <section class="card controls">
-          <h1>Générateur de pass-phrases</h1>
-          <p class="subtitle">
-            Générez des mots de passe robustes dont on peut (peut-être) se
-            souvenir&#8239;!
-          </p>
+          <h2>Personnalisation</h2>
 
           <div class="control-group">
             <label
@@ -154,26 +216,6 @@
               </div>
             </div>
           </details>
-        </section>
-
-        <section class="card main-phrase">
-          <div
-            class="phrase-display"
-            id="phraseDisplay"></div>
-          <div class="phrase-actions">
-            <button
-              class="btn btn-outline"
-              id="copyMainBtn"
-              type="button">
-              Copier
-            </button>
-          </div>
-          <button
-            class="btn btn-primary"
-            id="regenerateBtn"
-            type="button">
-            Générer à nouveau
-          </button>
         </section>
 
         <aside class="card strength">
