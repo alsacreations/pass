@@ -8,6 +8,10 @@
   --border: #e5e7eb;
   --radius: 20px;
   --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.06);
+  --text-20: 1.25rem;
+  --text-48: 3rem;
+  --text-60: 3.75rem;
+  --text-l: clamp(var(--text-20), 0.565rem + 3.0435vw, var(--text-48));
 }
 
 * {
@@ -189,7 +193,7 @@ input[type="text"]:focus {
 }
 
 .phrase-display {
-  font-size: 1.6rem;
+  font-size: var(--text-l);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text);
