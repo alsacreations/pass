@@ -52,7 +52,7 @@ main {
         300px
       );
     grid-template-areas: "controls main strength";
-    gap: 24px;
+    gap: 32px;
   }
 }
 
@@ -193,7 +193,7 @@ input[type="text"]:focus {
 }
 
 .phrase-display {
-  font-size: var(--text-l);
+  font-size: 1.8rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text);
@@ -302,6 +302,99 @@ input[type="text"]:focus {
 .strength-time strong {
   display: block;
   margin-top: 4px;
+}
+
+.fun-fact {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.fun-fact-viewport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.5rem;
+  padding: 0 8px;
+}
+
+.fun-fact-text {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: opacity 0.3s ease;
+}
+
+.fun-fact-text.is-fading {
+  opacity: 0%;
+}
+
+.fun-fact-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.fun-fact-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--accent-dark);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.fun-fact-arrow:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.fun-fact-arrow:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.fun-fact-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.fun-fact-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--border);
+  cursor: pointer;
+}
+
+.fun-fact-dot[aria-current="true"] {
+  background: var(--accent);
+}
+
+.fun-fact-dot:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.title {
+  font-size: 1.5rem;
+  margin: 0 0 6px;
+  color: var(--accent-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fun-fact-text {
+    transition: none;
+  }
 }
 
 /* Footer */
