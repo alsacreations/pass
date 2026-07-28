@@ -85,6 +85,15 @@
     { "m": "Joyeux", "f": "Joyeuse" },
     { "m": "Nul", "f": "Nulle" },
     { "m": "Terrible", "f": "Terrible" },
+    { "m": "Incroyable", "f": "Incroyable" },
+    { "m": "Mignon", "f": "Mignonne" },
+    { "m": "Bizarre", "f": "Bizarre" },
+    { "m": "Chouette", "f": "Chouette" },
+    { "m": "Génial", "f": "Géniale" },
+    { "m": "Fantastique", "f": "Fantastique" },
+    { "m": "Formidable", "f": "Formidable" },
+    { "m": "Charmant", "f": "Charmante" },
+    { "m": "Merveilleux", "f": "Merveilleuse" },
     { "m": "Mini", "f": "Mini" },
     { "m": "Super", "f": "Super" },
     { "m": "Flou", "f": "Floue" }
@@ -130,6 +139,8 @@
     { "m": "Bleu", "f": "Bleue" },
     { "m": "Doré", "f": "Dorée" },
     { "m": "Gris", "f": "Grise" },
+    { "m": "Malaisant", "f": "Malaisante" },
+    { "m": "Invisible", "f": "Invisible" },
     { "m": "Rouillé", "f": "Rouillée" },
     { "m": "Foncé", "f": "Foncée" }
   ]
