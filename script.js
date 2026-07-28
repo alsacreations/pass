@@ -84,24 +84,34 @@ function buildPhrase(options) {
   return phrase;
 }
 
+// Estime l'entropie d'un mot personnalisé à partir de sa longueur et de la
+// diversité de ses caractères (minuscules/majuscules/chiffres/symboles),
+// puisqu'un tirage dans wordData.words ne s'applique pas ici.
+function estimateCustomWordBits(word) {
+  let charsetSize = 0;
+  if (/[a-z]/.test(word)) charsetSize += 26;
+  if (/[A-Z]/.test(word)) charsetSize += 26;
+  if (/[0-9]/.test(word)) charsetSize += 10;
+  if (/[^a-zA-Z0-9]/.test(word)) charsetSize += 33;
+
+  return word.length * Math.log2(Math.max(charsetSize, 1));
+}
+
 function computeBits(options) {
   const { count, digits, special, customWord } = options;
   const slots = SLOT_DISTRIBUTION[count];
 
-  // Un mot personnalisé est un choix fixe connu de l'utilisateur : il n'apporte
-  // pas l'incertitude d'un tirage dans la liste, donc son facteur vaut 1.
-  const wordsFactor = customWord ? 1 : wordData.words.length;
-
   let combinations =
     ARTICLES.length *
-    wordsFactor *
     permutations(wordData.prefixes.length, slots.prefixes) *
     permutations(wordData.suffixes.length, slots.suffixes);
 
   if (digits) combinations *= wordData.numbers.length;
   if (special) combinations *= SPECIAL_CHARS.length;
 
-  return Math.log2(combinations);
+  const wordBits = customWord ? estimateCustomWordBits(customWord) : Math.log2(wordData.words.length);
+
+  return Math.log2(combinations) + wordBits;
 }
 
 // La plage de bits réellement atteignable dépend de la taille des listes
