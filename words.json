@@ -27,7 +27,9 @@
     { "text": "Concombre", "gender": "m" },
     { "text": "Cousin", "gender": "m" },
     { "text": "Slip", "gender": "m" },
+    { "text": "Machin", "gender": "m" },
     { "text": "Wurcht", "gender": "f" },
+    { "text": "Patate", "gender": "f" },
     { "text": "Saucisse", "gender": "f" },
     { "text": "Ginette", "gender": "f" },
     { "text": "Finette", "gender": "f" },
@@ -41,7 +43,12 @@
     { "text": "Winstub", "gender": "f" },
     { "text": "Caniche", "gender": "m" },
     { "text": "Lama", "gender": "m" },
-    { "text": "Salade", "gender": "f" }
+    { "text": "Salade", "gender": "f" },
+    { "text": "Nez", "gender": "m" },
+    { "text": "Nombril", "gender": "m" },
+    { "text": "Fesse", "gender": "f" },
+    { "text": "Croûton", "gender": "m" },
+    { "text": "Coucou", "gender": "m" }
   ],
   "prefixes": [
     { "m": "Coquin", "f": "Coquine" },
@@ -52,6 +59,7 @@
     { "m": "Fringant", "f": "Fringante" },
     { "m": "Rigolo", "f": "Rigolote" },
     { "m": "Giga", "f": "Giga" },
+    { "m": "Infect", "f": "Infecte" },
     { "m": "Vieux", "f": "Vieille" },
     { "m": "Délicieux", "f": "Délicieuse" },
     { "m": "Pauvre", "f": "Pauvre" },
@@ -63,7 +71,12 @@
     { "m": "Léger", "f": "Légère" },
     { "m": "Méchant", "f": "Méchante" },
     { "m": "Beau", "f": "Belle" },
-    { "m": "Joyeux", "f": "Joyeuse" }
+    { "m": "Joyeux", "f": "Joyeuse" },
+    { "m": "Nul", "f": "Nulle" },
+    { "m": "Zinzin", "f": "Zinzine" },
+    { "m": "Dodu", "f": "Dodue" },
+    { "m": "Chauve", "f": "Chauve" },
+    { "m": "Flou", "f": "Floue" }
   ],
   "suffixes": [
     { "m": "Poilu", "f": "Poilue" },
@@ -93,6 +106,11 @@
     { "m": "Inviolable", "f": "Inviolable" },
     { "m": "Inutile", "f": "Inutile" },
     { "m": "Pervers", "f": "Perverse" },
-    { "m": "Moqueur", "f": "Moqueuse" }
+    { "m": "Moqueur", "f": "Moqueuse" },
+    { "m": "Zarbi", "f": "Zarbi" },
+    { "m": "Chelou", "f": "Chelou" },
+    { "m": "Cabossé", "f": "Cabossée" },
+    { "m": "Bancal", "f": "Bancale" },
+    { "m": "Flapi", "f": "Flapie" }
   ]
 }
