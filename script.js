@@ -84,34 +84,23 @@ function buildPhrase(options) {
   return phrase;
 }
 
-// Estime l'entropie d'un mot personnalisé à partir de sa longueur et de la
-// diversité de ses caractères (minuscules/majuscules/chiffres/symboles),
-// puisqu'un tirage dans wordData.words ne s'applique pas ici.
-function estimateCustomWordBits(word) {
-  let charsetSize = 0;
-  if (/[a-z]/.test(word)) charsetSize += 26;
-  if (/[A-Z]/.test(word)) charsetSize += 26;
-  if (/[0-9]/.test(word)) charsetSize += 10;
-  if (/[^a-zA-Z0-9]/.test(word)) charsetSize += 33;
-
-  return word.length * Math.log2(Math.max(charsetSize, 1));
-}
-
 function computeBits(options) {
-  const { count, digits, special, customWord } = options;
+  const { count, digits, special } = options;
   const slots = SLOT_DISTRIBUTION[count];
 
+  // Un mot personnalisé n'est pas tiré de wordData.words, mais on ne sait rien
+  // de sa nature (mot commun ou chaîne aléatoire) : il apporte donc la même
+  // incertitude qu'un tirage dans la liste, ni plus ni moins.
   let combinations =
     ARTICLES.length *
+    wordData.words.length *
     permutations(wordData.prefixes.length, slots.prefixes) *
     permutations(wordData.suffixes.length, slots.suffixes);
 
   if (digits) combinations *= wordData.numbers.length;
   if (special) combinations *= SPECIAL_CHARS.length;
 
-  const wordBits = customWord ? estimateCustomWordBits(customWord) : Math.log2(wordData.words.length);
-
-  return Math.log2(combinations) + wordBits;
+  return Math.log2(combinations);
 }
 
 // La plage de bits réellement atteignable dépend de la taille des listes
@@ -119,10 +108,26 @@ function computeBits(options) {
 // la jauge entre le pire cas (4 mots, sans options) et le meilleur cas
 // (6 mots, chiffres + caractère spécial) plutôt que sur des seuils de bits
 // fixes, sinon la jauge peut plafonner artificiellement avec de petites listes.
+//
+// Les paliers ne sont pas des fractions arbitraires de cette plage : un mot
+// supplémentaire (~4-5 bits) pèse plus lourd que l'ajout des chiffres ou du
+// caractère spécial (~3 bits chacun), donc un découpage 0.25/0.5/0.75 fait
+// passer "4 mots + chiffres + spécial" en "moyen" alors que c'est déjà une
+// combinaison solide. On calibre donc les seuils "fort" et "très fort" sur
+// des configurations concrètes plutôt que sur des fractions uniformes.
 function computeBitsRange() {
+  const min = computeBits({ count: 4, digits: false, special: false });
+  const max = computeBits({ count: 6, digits: true, special: true });
+  const fortRef = computeBits({ count: 4, digits: true, special: true });
+  const veryStrongRef = computeBits({ count: 5, digits: true, special: true });
+  const span = max - min;
+
   return {
-    min: computeBits({ count: 4, digits: false, special: false }),
-    max: computeBits({ count: 6, digits: true, special: true }),
+    min,
+    max,
+    moyenThreshold: (fortRef - min) / span / 2,
+    fortThreshold: (fortRef - min) / span,
+    veryStrongThreshold: (veryStrongRef - min) / span,
   };
 }
 
@@ -139,16 +144,16 @@ function computeStrength(options) {
 // d'entropie cryptographique, pour que le libellé de temps et le niveau de
 // sécurité racontent toujours la même histoire.
 function formatCrackTime(percent) {
-  if (percent < 0.25) return 'quelques secondes';
-  if (percent < 0.5) return 'quelques jours';
-  if (percent < 0.75) return 'quelques années';
+  if (percent < bitsRange.moyenThreshold) return 'quelques secondes';
+  if (percent < bitsRange.fortThreshold) return 'quelques jours';
+  if (percent < bitsRange.veryStrongThreshold) return 'quelques années';
   return 'des milliers d’années';
 }
 
 function strengthLevel(percent) {
-  if (percent < 0.25) return { label: 'faible', color: '#c0392b' };
-  if (percent < 0.5) return { label: 'moyen', color: '#a15b0a' };
-  if (percent < 0.75) return { label: 'fort', color: '#1c7a43' };
+  if (percent < bitsRange.moyenThreshold) return { label: 'faible', color: '#c0392b' };
+  if (percent < bitsRange.fortThreshold) return { label: 'moyen', color: '#a15b0a' };
+  if (percent < bitsRange.veryStrongThreshold) return { label: 'fort', color: '#1c7a43' };
   return { label: 'très fort', color: '#1e8449' };
 }
 
