@@ -54,12 +54,12 @@
     { "m": "Giga", "f": "Giga" },
     { "m": "Vieux", "f": "Vieille" },
     { "m": "Délicieux", "f": "Délicieuse" },
-    { "m": "Etrange", "f": "Etrange" },
+    { "m": "Pauvre", "f": "Pauvre" },
     { "m": "Grand", "f": "Grande" },
-    { "m": "Etonnant", "f": "Etonnante" },
+    { "m": "Frétillant", "f": "Frétillante" },
     { "m": "Gros", "f": "Grosse" },
     { "m": "Cocasse", "f": "Cocasse" },
-    { "m": "Odorant", "f": "Odorante" },
+    { "m": "Malodorant", "f": "Malodorante" },
     { "m": "Léger", "f": "Légère" },
     { "m": "Méchant", "f": "Méchante" },
     { "m": "Beau", "f": "Belle" },
@@ -82,6 +82,7 @@
     { "m": "Fragile", "f": "Fragile" },
     { "m": "Cramé", "f": "Cramée" },
     { "m": "Facétieux", "f": "Facétieuse" },
+    { "m": "Obsédé", "f": "Obsédée" },
     { "m": "Stupide", "f": "Stupide" },
     { "m": "Humide", "f": "Humide" },
     { "m": "Jaloux", "f": "Jalouse" },
@@ -91,6 +92,7 @@
     { "m": "Minuscule", "f": "Minuscule" },
     { "m": "Inviolable", "f": "Inviolable" },
     { "m": "Inutile", "f": "Inutile" },
+    { "m": "Pervers", "f": "Perverse" },
     { "m": "Moqueur", "f": "Moqueuse" }
   ]
 }
