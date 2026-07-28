@@ -5,11 +5,12 @@
     { "text": "Sylvaner", "gender": "m" },
     { "text": "Choucroute", "gender": "f" },
     { "text": "Popotin", "gender": "m" },
-    { "text": "Margoulette", "gender": "f" },
+    { "text": "Grand-mère", "gender": "f" },
     { "text": "Munster", "gender": "m" },
     { "text": "Flammekueche", "gender": "f" },
     { "text": "Bredele", "gender": "m" },
     { "text": "Helmut", "gender": "m" },
+    { "text": "Cousin", "gender": "m" },
     { "text": "Wurcht", "gender": "f" },
     { "text": "Saucisse", "gender": "f" },
     { "text": "Ginette", "gender": "f" },
@@ -18,14 +19,15 @@
     { "text": "Knack", "gender": "f" },
     { "text": "Riesling", "gender": "m" },
     { "text": "Schloppe", "gender": "f" },
+    { "text": "Belle-mère", "gender": "f" },
     { "text": "Manele", "gender": "m" },
     { "text": "Winstub", "gender": "f" },
-    { "text": "Kebab", "gender": "m" },
+    { "text": "Caniche", "gender": "m" },
     { "text": "Salade", "gender": "f" }
   ],
   "prefixes": [
     { "m": "Coquin", "f": "Coquine" },
-    { "m": "Farfelu", "f": "Farfelue" },
+    { "m": "Ridicule", "f": "Ridicule" },
     { "m": "Petit", "f": "Petite" },
     { "m": "Léger", "f": "Légère" },
     { "m": "Courageux", "f": "Courageuse" },
@@ -66,7 +68,9 @@
     { "m": "Jaloux", "f": "Jalouse" },
     { "m": "Mou", "f": "Molle" },
     { "m": "Moche", "f": "Moche" },
+    { "m": "Tordu", "f": "Tordue" },
     { "m": "Minuscule", "f": "Minuscule" },
+    { "m": "Fragile", "f": "Fragile" },
     { "m": "Moqueur", "f": "Moqueuse" }
   ]
 }
