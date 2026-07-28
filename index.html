@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Générateur de phrases de passe</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <div class="page-grid">
+      <section class="card controls">
+        <h1>Générateur de phrases de passe</h1>
+        <p class="subtitle">Générez des phrases de passe robustes et cohérentes</p>
+
+        <div class="control-group">
+          <label class="label-row" for="countInput">
+            <span id="countLabel">4 mots</span>
+          </label>
+          <input type="range" id="countInput" min="4" max="6" value="4" step="1" />
+        </div>
+
+        <div class="control-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="digitsInput" checked />
+            <span>Chiffres</span>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="specialInput" checked />
+            <span>Caractère spécial</span>
+          </label>
+        </div>
+
+        <details class="control-group advanced">
+          <summary>Options avancées</summary>
+
+          <div class="control-group">
+            <label class="label-row" for="customWordInput">Mot personnalisé (optionnel)</label>
+            <input type="text" id="customWordInput" placeholder="ex. Dragon" />
+          </div>
+
+          <div class="control-group">
+            <span class="label-row">Genre du mot</span>
+            <div class="radio-group">
+              <label>
+                <input type="radio" name="customGender" value="m" checked />
+                Masculin
+              </label>
+              <label>
+                <input type="radio" name="customGender" value="f" />
+                Féminin
+              </label>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section class="card main-phrase">
+        <div class="phrase-display" id="phraseDisplay"></div>
+        <div class="phrase-actions">
+          <button class="btn btn-outline" id="copyMainBtn" type="button">Copier</button>
+        </div>
+        <button class="btn btn-primary" id="regenerateBtn" type="button">Générer à nouveau</button>
+      </section>
+
+      <aside class="card strength">
+        <h2>Niveau de sécurité</h2>
+        <div class="gauge" id="gauge">
+          <svg viewBox="0 0 120 68" class="gauge-svg">
+            <path d="M10,64 A50,50 0 0,1 110,64" class="gauge-track" />
+            <path d="M10,64 A50,50 0 0,1 110,64" class="gauge-fill" id="gaugeFill" />
+          </svg>
+          <span class="gauge-label" id="gaugeLabel">fort</span>
+        </div>
+        <p class="strength-time" id="strengthTime"></p>
+      </aside>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
