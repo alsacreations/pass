@@ -145,33 +145,62 @@ function computeStrength(options) {
   return { percent, timeLabel: formatCrackTime(percent) };
 }
 
+const LEVELS = [
+  { label: 'vulnérable', color: '#7b241c', crackTime: 'moins d’une seconde' },
+  { label: 'faible', color: '#c0392b', crackTime: 'quelques secondes' },
+  { label: 'moyen', color: '#a15b0a', crackTime: 'quelques jours' },
+  { label: 'fort', color: '#1c7a43', crackTime: 'quelques années' },
+  { label: 'très fort', color: '#1e8449', crackTime: 'des milliers d’années' },
+];
+
+// Bornes séparant les 5 niveaux ci-dessus, alignées sur computeBitsRange().
+function levelBounds() {
+  return [0, bitsRange.vulnerableThreshold, bitsRange.moyenThreshold, bitsRange.fortThreshold, bitsRange.veryStrongThreshold, 1];
+}
+
 // Paliers alignés sur strengthLevel() : une estimation simplifiée relative à
 // la plage min/max atteignable avec les listes chargées, pas une vraie mesure
 // d'entropie cryptographique, pour que le libellé de temps et le niveau de
 // sécurité racontent toujours la même histoire.
 function formatCrackTime(percent) {
-  if (percent < bitsRange.vulnerableThreshold) return 'moins d’une seconde';
-  if (percent < bitsRange.moyenThreshold) return 'quelques secondes';
-  if (percent < bitsRange.fortThreshold) return 'quelques jours';
-  if (percent < bitsRange.veryStrongThreshold) return 'quelques années';
-  return 'des milliers d’années';
+  return strengthLevel(percent).crackTime;
 }
 
 function strengthLevel(percent) {
-  if (percent < bitsRange.vulnerableThreshold) return { label: 'vulnérable', color: '#7b241c' };
-  if (percent < bitsRange.moyenThreshold) return { label: 'faible', color: '#c0392b' };
-  if (percent < bitsRange.fortThreshold) return { label: 'moyen', color: '#a15b0a' };
-  if (percent < bitsRange.veryStrongThreshold) return { label: 'fort', color: '#1c7a43' };
-  return { label: 'très fort', color: '#1e8449' };
+  const bounds = levelBounds();
+  const index = bounds.slice(1, -1).findIndex((bound) => percent < bound);
+  return LEVELS[index === -1 ? LEVELS.length - 1 : index];
+}
+
+// Les seuils entre niveaux ne sont pas équidistants (un mot de plus pèse plus
+// que l'ajout des chiffres/spécial, voir computeBitsRange), donc utiliser le
+// pourcentage brut pour le remplissage de la jauge écrase visuellement les
+// niveaux les uns contre les autres. On répartit donc chaque niveau sur une
+// tranche égale de la jauge (1/5 chacun), en interpolant la position à
+// l'intérieur de la tranche pour garder un retour visuel continu.
+function computeVisualPercent(percent) {
+  const bounds = levelBounds();
+  const segments = bounds.length - 1;
+
+  for (let i = 0; i < segments; i++) {
+    const start = bounds[i];
+    const end = bounds[i + 1];
+    if (percent < end || i === segments - 1) {
+      const localRatio = end > start ? (percent - start) / (end - start) : 0;
+      return (i + Math.min(Math.max(localRatio, 0), 1)) / segments;
+    }
+  }
+  return 1;
 }
 
 function updateGauge(percent) {
   const level = strengthLevel(percent);
+  const visualPercent = computeVisualPercent(percent);
   // stroke-linecap: round dessine un point même pour un tracé de longueur
   // nulle ; à 0 % on masque donc entièrement le remplissage plutôt que de
   // laisser ce point parasite s'afficher sur le tracé.
   gaugeFill.style.opacity = percent > 0 ? '1' : '0';
-  gaugeFill.style.strokeDashoffset = String(GAUGE_ARC_LENGTH * (1 - percent));
+  gaugeFill.style.strokeDashoffset = String(GAUGE_ARC_LENGTH * (1 - visualPercent));
   gaugeFill.style.stroke = level.color;
   gaugeLabel.textContent = level.label;
   gaugeLabel.style.background = level.color;
