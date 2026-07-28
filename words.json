@@ -1,4 +1,18 @@
 {
+  "numbers": [
+    "0",
+    "1",
+    "42",
+    "69",
+    "007",
+    "101",
+    "404",
+    "666",
+    "1024",
+    "1337",
+    "1664",
+    "2048"
+  ],
   "words": [
     { "text": "Kiwi", "gender": "m" },
     { "text": "Bretzel", "gender": "f" },
@@ -12,6 +26,7 @@
     { "text": "Helmut", "gender": "m" },
     { "text": "Concombre", "gender": "m" },
     { "text": "Cousin", "gender": "m" },
+    { "text": "Slip", "gender": "m" },
     { "text": "Wurcht", "gender": "f" },
     { "text": "Saucisse", "gender": "f" },
     { "text": "Ginette", "gender": "f" },
@@ -21,9 +36,11 @@
     { "text": "Riesling", "gender": "m" },
     { "text": "Schloppe", "gender": "f" },
     { "text": "Belle-mère", "gender": "f" },
+    { "text": "Orteil", "gender": "m" },
     { "text": "Manele", "gender": "m" },
     { "text": "Winstub", "gender": "f" },
     { "text": "Caniche", "gender": "m" },
+    { "text": "Lama", "gender": "m" },
     { "text": "Salade", "gender": "f" }
   ],
   "prefixes": [
@@ -59,6 +76,7 @@
     { "m": "Farfelu", "f": "Farfelue" },
     { "m": "Timide", "f": "Timide" },
     { "m": "Gluant", "f": "Gluante" },
+    { "m": "Flasque", "f": "Flasque" },
     { "m": "Puant", "f": "Puante" },
     { "m": "Barbu", "f": "Barbue" },
     { "m": "Fragile", "f": "Fragile" },

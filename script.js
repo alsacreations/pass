@@ -75,7 +75,7 @@ function buildPhrase(options) {
   let phrase = segments.join('-');
 
   if (digits) {
-    phrase += String(Math.floor(Math.random() * 99) + 1);
+    phrase += pickOne(wordData.numbers);
   }
   if (special) {
     phrase += pickOne(SPECIAL_CHARS);
@@ -98,7 +98,7 @@ function computeBits(options) {
     permutations(wordData.prefixes.length, slots.prefixes) *
     permutations(wordData.suffixes.length, slots.suffixes);
 
-  if (digits) combinations *= 99;
+  if (digits) combinations *= wordData.numbers.length;
   if (special) combinations *= SPECIAL_CHARS.length;
 
   return Math.log2(combinations);
@@ -136,9 +136,9 @@ function formatCrackTime(percent) {
 }
 
 function strengthLevel(percent) {
-  if (percent < 0.25) return { label: 'faible', color: '#e74c3c' };
-  if (percent < 0.5) return { label: 'moyen', color: '#f39c12' };
-  if (percent < 0.75) return { label: 'fort', color: '#27ae60' };
+  if (percent < 0.25) return { label: 'faible', color: '#c0392b' };
+  if (percent < 0.5) return { label: 'moyen', color: '#a15b0a' };
+  if (percent < 0.75) return { label: 'fort', color: '#1c7a43' };
   return { label: 'très fort', color: '#1e8449' };
 }
 

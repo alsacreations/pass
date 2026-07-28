@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pass.alsacreations.com/sitemap.xml
