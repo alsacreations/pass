@@ -7,13 +7,15 @@ const ARTICLES = [
   { m: 'Mon', f: 'Ma' },
 ];
 
-// Le compteur "nombre de mots" (4-6) inclut désormais l'article ajouté en
-// tête de phrase, d'où le décalage par rapport aux slots préfixes/suffixes.
+// Le compteur "nombre de mots" (2-6) inclut l'article et le préfixe quand ils
+// sont présents, d'où le décalage par rapport aux slots préfixes/suffixes.
 // Il n'y a jamais plus d'un préfixe : les mots supplémentaires vont tous en suffixes.
 const SLOT_DISTRIBUTION = {
-  4: { prefixes: 1, suffixes: 1 },
-  5: { prefixes: 1, suffixes: 2 },
-  6: { prefixes: 1, suffixes: 3 },
+  2: { article: false, prefixes: 0, suffixes: 1 },
+  3: { article: true, prefixes: 0, suffixes: 1 },
+  4: { article: true, prefixes: 1, suffixes: 1 },
+  5: { article: true, prefixes: 1, suffixes: 2 },
+  6: { article: true, prefixes: 1, suffixes: 3 },
 };
 
 const countInput = document.getElementById('countInput');
@@ -67,11 +69,13 @@ function buildPhrase(options) {
   const word = pickCentralWord(options);
   const gender = word.gender;
 
-  const article = pickOne(ARTICLES)[gender];
   const prefixes = pickDistinct(wordData.prefixes, slots.prefixes).map((p) => p[gender]);
   const suffixes = pickDistinct(wordData.suffixes, slots.suffixes).map((s) => s[gender]);
 
-  const segments = [article, ...prefixes, word.text, ...suffixes];
+  const segments = [];
+  if (slots.article) segments.push(pickOne(ARTICLES)[gender]);
+  segments.push(...prefixes, word.text, ...suffixes);
+
   let phrase = segments.join('-');
 
   if (digits) {
@@ -92,7 +96,7 @@ function computeBits(options) {
   // de sa nature (mot commun ou chaîne aléatoire) : il apporte donc la même
   // incertitude qu'un tirage dans la liste, ni plus ni moins.
   let combinations =
-    ARTICLES.length *
+    (slots.article ? ARTICLES.length : 1) *
     wordData.words.length *
     permutations(wordData.prefixes.length, slots.prefixes) *
     permutations(wordData.suffixes.length, slots.suffixes);
@@ -105,7 +109,7 @@ function computeBits(options) {
 
 // La plage de bits réellement atteignable dépend de la taille des listes
 // chargées (échantillon aujourd'hui, vraies listes ensuite). On calibre donc
-// la jauge entre le pire cas (4 mots, sans options) et le meilleur cas
+// la jauge entre le pire cas (2 mots, sans options) et le meilleur cas
 // (6 mots, chiffres + caractère spécial) plutôt que sur des seuils de bits
 // fixes, sinon la jauge peut plafonner artificiellement avec de petites listes.
 //
@@ -116,16 +120,18 @@ function computeBits(options) {
 // combinaison solide. On calibre donc les seuils "fort" et "très fort" sur
 // des configurations concrètes plutôt que sur des fractions uniformes.
 function computeBitsRange() {
-  const min = computeBits({ count: 4, digits: false, special: false });
+  const min = computeBits({ count: 2, digits: false, special: false });
   const max = computeBits({ count: 6, digits: true, special: true });
   const fortRef = computeBits({ count: 4, digits: true, special: true });
   const veryStrongRef = computeBits({ count: 5, digits: true, special: true });
   const span = max - min;
+  const moyenThreshold = (fortRef - min) / span / 2;
 
   return {
     min,
     max,
-    moyenThreshold: (fortRef - min) / span / 2,
+    vulnerableThreshold: moyenThreshold / 2,
+    moyenThreshold,
     fortThreshold: (fortRef - min) / span,
     veryStrongThreshold: (veryStrongRef - min) / span,
   };
@@ -144,6 +150,7 @@ function computeStrength(options) {
 // d'entropie cryptographique, pour que le libellé de temps et le niveau de
 // sécurité racontent toujours la même histoire.
 function formatCrackTime(percent) {
+  if (percent < bitsRange.vulnerableThreshold) return 'moins d’une seconde';
   if (percent < bitsRange.moyenThreshold) return 'quelques secondes';
   if (percent < bitsRange.fortThreshold) return 'quelques jours';
   if (percent < bitsRange.veryStrongThreshold) return 'quelques années';
@@ -151,6 +158,7 @@ function formatCrackTime(percent) {
 }
 
 function strengthLevel(percent) {
+  if (percent < bitsRange.vulnerableThreshold) return { label: 'vulnérable', color: '#7b241c' };
   if (percent < bitsRange.moyenThreshold) return { label: 'faible', color: '#c0392b' };
   if (percent < bitsRange.fortThreshold) return { label: 'moyen', color: '#a15b0a' };
   if (percent < bitsRange.veryStrongThreshold) return { label: 'fort', color: '#1c7a43' };
