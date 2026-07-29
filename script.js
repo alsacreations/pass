@@ -1,6 +1,16 @@
 const SPECIAL_CHARS = ["!", "?", "#", "%", "*", "+", "@"]
 const GAUGE_ARC_LENGTH = 157 // longueur du demi-cercle SVG (π × rayon 50)
 const FUN_FACT_INTERVAL_MS = 10000
+const HISTORY_STORAGE_KEY = "pass-history"
+const MAX_HISTORY = 10
+// Les changements d'options régénèrent la phrase à chaque frappe/glissement
+// de curseur ; on n'enregistre l'entrée d'historique qu'une fois que
+// l'utilisateur s'est arrêté, pour éviter une entrée par caractère tapé.
+const HISTORY_DEBOUNCE_MS = 600
+
+const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="2"/></svg>`
+const TRASH_ICON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M10 11v6M14 11v6M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+const CHECK_ICON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l5 5L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 
 const ARTICLES = [
   { m: "Le", f: "La" },
@@ -36,6 +46,13 @@ const gaugeFill = document.getElementById("gaugeFill")
 const gaugeLabel = document.getElementById("gaugeLabel")
 const strengthTime = document.getElementById("strengthTime")
 
+const historyBtn = document.getElementById("historyBtn")
+const historyDialog = document.getElementById("historyDialog")
+const historyCloseBtn = document.getElementById("historyCloseBtn")
+const historyList = document.getElementById("historyList")
+const historyEmpty = document.getElementById("historyEmpty")
+const historyClearBtn = document.getElementById("historyClearBtn")
+
 const funFactCard = document.querySelector(".fun-fact")
 const funFactText = document.getElementById("funFactText")
 const funFactDots = document.getElementById("funFactDots")
@@ -51,6 +68,9 @@ let bitsRange = { min: 0, max: 1 }
 let funFacts = []
 let funFactIndex = 0
 let funFactTimer = null
+
+let history = loadHistory()
+let historyDebounceTimer = null
 
 function pickOne(list) {
   return list[Math.floor(Math.random() * list.length)]
@@ -261,8 +281,10 @@ function readOptions() {
 
 function generateAll() {
   const options = readOptions()
+  const phrase = buildPhrase(options)
 
-  phraseDisplay.textContent = buildPhrase(options)
+  phraseDisplay.textContent = phrase
+  scheduleHistoryEntry(phrase)
 
   const { percent, timeLabel } = computeStrength(options)
   updateGauge(percent)
@@ -328,6 +350,103 @@ function restartAutoRotate() {
   startAutoRotate()
 }
 
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function saveHistory() {
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history))
+  } catch {
+    // stockage indisponible (navigation privée, quota dépassé...) : on continue sans persister
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div")
+  div.textContent = text
+  return div.innerHTML
+}
+
+function formatHistoryDate(timestamp) {
+  return new Date(timestamp).toLocaleString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })
+}
+
+function addHistoryEntry(phrase) {
+  if (history[0]?.phrase === phrase) return
+
+  history.unshift({ phrase, timestamp: Date.now() })
+  history = history.slice(0, MAX_HISTORY)
+  saveHistory()
+  if (historyDialog.open) renderHistoryList()
+}
+
+function scheduleHistoryEntry(phrase) {
+  clearTimeout(historyDebounceTimer)
+  historyDebounceTimer = setTimeout(
+    () => addHistoryEntry(phrase),
+    HISTORY_DEBOUNCE_MS,
+  )
+}
+
+function deleteHistoryEntry(index) {
+  history.splice(index, 1)
+  saveHistory()
+  renderHistoryList()
+}
+
+function clearHistory() {
+  history = []
+  saveHistory()
+  renderHistoryList()
+}
+
+function renderHistoryList() {
+  historyList.innerHTML = history
+    .map(
+      (entry, index) => `
+        <li class="history-item">
+          <div class="history-item-text">
+            <code class="history-item-phrase">${escapeHtml(entry.phrase)}</code>
+            <p class="history-item-date">${formatHistoryDate(entry.timestamp)}</p>
+          </div>
+          <div class="history-item-actions">
+            <button class="history-item-btn" type="button" data-action="copy" data-index="${index}" aria-label="Copier cette pass-phrase">${COPY_ICON}</button>
+            <button class="history-item-btn" type="button" data-action="delete" data-index="${index}" aria-label="Supprimer cette pass-phrase de l'historique">${TRASH_ICON}</button>
+          </div>
+        </li>`,
+    )
+    .join("")
+
+  historyList.hidden = history.length === 0
+  historyEmpty.hidden = history.length > 0
+  historyClearBtn.hidden = history.length === 0
+}
+
+function copyHistoryItem(phrase, button) {
+  navigator.clipboard.writeText(phrase).then(() => {
+    const original = button.innerHTML
+    button.classList.add("copied")
+    button.innerHTML = CHECK_ICON
+    setTimeout(() => {
+      button.innerHTML = original
+      button.classList.remove("copied")
+    }, 1200)
+  })
+}
+
 function copyToClipboard(text, button) {
   navigator.clipboard.writeText(text).then(() => {
     const original = button.textContent
@@ -354,6 +473,27 @@ regenerateBtn.addEventListener("click", generateAll)
 copyMainBtn.addEventListener("click", () =>
   copyToClipboard(phraseDisplay.textContent, copyMainBtn),
 )
+
+historyBtn.addEventListener("click", () => {
+  renderHistoryList()
+  historyDialog.showModal()
+})
+historyCloseBtn.addEventListener("click", () => historyDialog.close())
+historyDialog.addEventListener("click", (e) => {
+  if (e.target === historyDialog) historyDialog.close()
+})
+historyClearBtn.addEventListener("click", clearHistory)
+historyList.addEventListener("click", (e) => {
+  const button = e.target.closest("button[data-action]")
+  if (!button) return
+
+  const index = Number(button.dataset.index)
+  if (button.dataset.action === "copy") {
+    copyHistoryItem(history[index].phrase, button)
+  } else if (button.dataset.action === "delete") {
+    deleteHistoryEntry(index)
+  }
+})
 
 funFactPrevBtn.addEventListener("click", prevFact)
 funFactNextBtn.addEventListener("click", nextFact)
