@@ -490,7 +490,7 @@ h2 {
 }
 
 .subtitle {
-  max-width: 46ch;
+  max-width: 65ch;
   margin: 0 auto 28px;
   color: var(--muted);
   font-size: 0.9rem;
