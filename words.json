@@ -23,7 +23,7 @@
     { "text": "Munster", "gender": "m" },
     { "text": "Flammekueche", "gender": "f" },
     { "text": "Bredele", "gender": "m" },
-    { "text": "Helmut", "gender": "m" },
+    { "text": "Josiane", "gender": "f" },
     { "text": "Concombre", "gender": "m" },
     { "text": "Cousin", "gender": "m" },
     { "text": "Princesse", "gender": "f" },
@@ -50,14 +50,16 @@
     { "text": "Limace", "gender": "f" },
     { "text": "Morve", "gender": "f" },
     { "text": "Licorne", "gender": "f" },
+    { "text": "Biche", "gender": "f" },
     { "text": "Mot", "gender": "m" },
     { "text": "Truc", "gender": "m" },
-    { "text": "Slime", "gender": "m" },
+    { "text": "Marcel", "gender": "m" },
     { "text": "Salami", "gender": "m" },
     { "text": "Calamar", "gender": "m" },
     { "text": "Salsifi", "gender": "m" },
     { "text": "Poney", "gender": "m" },
-    { "text": "Coucou", "gender": "m" }
+    { "text": "Doudou", "gender": "m" },
+    { "text": "Lapin", "gender": "m" }
   ],
   "prefixes": [
     { "m": "Joli", "f": "Jolie" },
@@ -143,6 +145,7 @@
     { "m": "Malaisant", "f": "Malaisante" },
     { "m": "Invisible", "f": "Invisible" },
     { "m": "Rouillé", "f": "Rouillée" },
+    { "m": "Sucré", "f": "Sucrée" },
     { "m": "Foncé", "f": "Foncée" }
   ]
 }
