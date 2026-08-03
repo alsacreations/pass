@@ -288,7 +288,7 @@ function generateAll() {
 
   const { percent, timeLabel } = computeStrength(options)
   updateGauge(percent)
-  strengthTime.innerHTML = `Il faudrait <strong>${timeLabel}</strong> pour deviner ce mot de passe.`
+  strengthTime.innerHTML = `Il faudrait <strong>${timeLabel}</strong> pour deviner ce mot de passe.<br><strong>Attention&#8239;: aucun mot de passe n'est inviolable&#8239;!</strong>`
 }
 
 function renderFunFact(index) {
