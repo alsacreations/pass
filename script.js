@@ -19,15 +19,13 @@ const ARTICLES = [
   { m: "Ton", f: "Ta" },
 ]
 
-// Le compteur "nombre de mots" (2-6) inclut l'article et le préfixe quand ils
+// Le compteur "nombre de mots" (2-4) inclut l'article et le préfixe quand ils
 // sont présents, d'où le décalage par rapport aux slots préfixes/suffixes.
 // Il n'y a jamais plus d'un préfixe : les mots supplémentaires vont tous en suffixes.
 const SLOT_DISTRIBUTION = {
   2: { article: false, prefixes: 0, suffixes: 1 },
   3: { article: true, prefixes: 0, suffixes: 1 },
   4: { article: true, prefixes: 1, suffixes: 1 },
-  5: { article: true, prefixes: 1, suffixes: 2 },
-  6: { article: true, prefixes: 1, suffixes: 3 },
 }
 
 const countInput = document.getElementById("countInput")
@@ -121,16 +119,36 @@ function buildPhrase(options) {
   if (slots.article) segments.push(pickOne(ARTICLES)[gender])
   segments.push(...prefixes, word.text, ...suffixes)
 
-  let phrase = segments.join(separator)
+  // Colle l'extra (spécial ou chiffre) à un mot choisi au hasard plutôt que
+  // toujours en toute fin de phrase : une position fixe est un pattern
+  // exploitable par un attaquant qui connaît l'algorithme (code public).
+  if (special) attachRandomly(segments, pickOne(SPECIAL_CHARS))
+  if (digits) attachRandomly(segments, pickOne(wordData.numbers))
 
-  if (special) {
-    phrase += pickOne(SPECIAL_CHARS)
-  }
-  if (digits) {
-    phrase += pickOne(wordData.numbers)
-  }
+  return segments.join(separator)
+}
 
-  return phrase
+// Colle `extra` avant ou après un segment choisi au hasard, sans passer par
+// le séparateur : l'extra reste toujours accolé à un mot (jamais un token
+// isolé entouré de séparateurs), ce qui garde la phrase lisible et n'introduit
+// pas un nouveau pattern "toujours entouré". Si spécial et chiffre tombent
+// sur le même segment, ils s'accolent l'un à l'autre contre ce mot.
+function attachRandomly(segments, extra) {
+  const positions = segments.flatMap((_, index) => [
+    { index, side: "before" },
+    { index, side: "after" },
+  ])
+  const { index, side } = pickOne(positions)
+  segments[index] =
+    side === "before" ? extra + segments[index] : segments[index] + extra
+}
+
+// Nombre de segments (article/préfixe/mot central/suffixes inclus) pour une
+// distribution donnée — doit rester cohérent avec buildPhrase(), c'est ce
+// total × 2 côtés qui donne le nombre de positions possibles pour un extra
+// dans attachRandomly().
+function segmentCount(slots) {
+  return (slots.article ? 1 : 0) + slots.prefixes + 1 + slots.suffixes
 }
 
 function computeBits(options) {
@@ -146,8 +164,14 @@ function computeBits(options) {
     permutations(wordData.prefixes.length, slots.prefixes) *
     permutations(wordData.suffixes.length, slots.suffixes)
 
-  if (digits) combinations *= wordData.numbers.length
-  if (special) combinations *= SPECIAL_CHARS.length
+  // Chaque extra actif ne se contente plus d'une valeur fixe en fin de
+  // phrase : il choisit aussi une position parmi les segments × 2 côtés
+  // (avant/après), cf. attachRandomly(). Les deux tirages (valeur, position)
+  // sont indépendants, d'où la multiplication.
+  const positions = segmentCount(slots) * 2
+
+  if (digits) combinations *= wordData.numbers.length * positions
+  if (special) combinations *= SPECIAL_CHARS.length * positions
 
   return Math.log2(combinations)
 }
@@ -155,20 +179,21 @@ function computeBits(options) {
 // La plage de bits réellement atteignable dépend de la taille des listes
 // chargées (échantillon aujourd'hui, vraies listes ensuite). On calibre donc
 // la jauge entre le pire cas (2 mots, sans options) et le meilleur cas
-// (6 mots, chiffres + caractère spécial) plutôt que sur des seuils de bits
+// (4 mots, chiffres + caractère spécial) plutôt que sur des seuils de bits
 // fixes, sinon la jauge peut plafonner artificiellement avec de petites listes.
 //
-// Les paliers ne sont pas des fractions arbitraires de cette plage : un mot
-// supplémentaire (~4-5 bits) pèse plus lourd que l'ajout des chiffres ou du
-// caractère spécial (~3 bits chacun), donc un découpage 0.25/0.5/0.75 fait
-// passer "4 mots + chiffres + spécial" en "moyen" alors que c'est déjà une
-// combinaison solide. On calibre donc les seuils "fort" et "très fort" sur
-// des configurations concrètes plutôt que sur des fractions uniformes.
+// Les paliers ne sont pas des fractions arbitraires de cette plage : chaque
+// option pèse un nombre de bits différent, et les chiffres/le caractère
+// spécial apportent désormais aussi l'entropie de leur position dans la
+// phrase (cf. computeBits), ce qui les rapproche du poids d'un mot plutôt
+// que de rester une poignée de bits fixes en fin de phrase. On calibre donc
+// les seuils "fort" et "très fort" sur des configurations concrètes plutôt
+// que sur des fractions uniformes.
 function computeBitsRange() {
   const min = computeBits({ count: 2, digits: false, special: false })
-  const max = computeBits({ count: 6, digits: true, special: true })
-  const fortRef = computeBits({ count: 4, digits: true, special: true })
-  const veryStrongRef = computeBits({ count: 5, digits: true, special: true })
+  const max = computeBits({ count: 4, digits: true, special: true })
+  const fortRef = computeBits({ count: 3, digits: true, special: true })
+  const veryStrongRef = computeBits({ count: 4, digits: true, special: false })
   const span = max - min
   const moyenThreshold = (fortRef - min) / span / 2
 
