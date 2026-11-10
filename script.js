@@ -1,4 +1,6 @@
 const SPECIAL_CHARS = ["!", "?", "#", "%", "*", "+", "@"]
+const LEET_SUBSTITUTIONS = { e: "3", a: "4", l: "1", s: "5" }
+const SUBSTITUTION_PROBABILITY = 1 / 3
 const GAUGE_ARC_LENGTH = 157 // longueur du demi-cercle SVG (π × rayon 50)
 const FUN_FACT_INTERVAL_MS = 10000
 const HISTORY_STORAGE_KEY = "pass-history"
@@ -119,36 +121,26 @@ function buildPhrase(options) {
   if (slots.article) segments.push(pickOne(ARTICLES)[gender])
   segments.push(...prefixes, word.text, ...suffixes)
 
-  // Colle l'extra (spécial ou chiffre) à un mot choisi au hasard plutôt que
-  // toujours en toute fin de phrase : une position fixe est un pattern
-  // exploitable par un attaquant qui connaît l'algorithme (code public).
-  if (special) attachRandomly(segments, pickOne(SPECIAL_CHARS))
-  if (digits) attachRandomly(segments, pickOne(wordData.numbers))
+  // Substitutions "leet" appliquées au hasard, avant l'ajout des extras.
+  const phrase = applySubstitutions(segments.join(separator))
 
-  return segments.join(separator)
+  // Caractère spécial puis chiffre, toujours accolés en fin de phrase.
+  const extras =
+    (special ? pickOne(SPECIAL_CHARS) : "") +
+    (digits ? pickOne(wordData.numbers) : "")
+
+  return phrase + extras
 }
 
-// Colle `extra` avant ou après un segment choisi au hasard, sans passer par
-// le séparateur : l'extra reste toujours accolé à un mot (jamais un token
-// isolé entouré de séparateurs), ce qui garde la phrase lisible et n'introduit
-// pas un nouveau pattern "toujours entouré". Si spécial et chiffre tombent
-// sur le même segment, ils s'accolent l'un à l'autre contre ce mot.
-function attachRandomly(segments, extra) {
-  const positions = segments.flatMap((_, index) => [
-    { index, side: "before" },
-    { index, side: "after" },
-  ])
-  const { index, side } = pickOne(positions)
-  segments[index] =
-    side === "before" ? extra + segments[index] : segments[index] + extra
-}
-
-// Nombre de segments (article/préfixe/mot central/suffixes inclus) pour une
-// distribution donnée — doit rester cohérent avec buildPhrase(), c'est ce
-// total × 2 côtés qui donne le nombre de positions possibles pour un extra
-// dans attachRandomly().
-function segmentCount(slots) {
-  return (slots.article ? 1 : 0) + slots.prefixes + 1 + slots.suffixes
+// Chaque occurrence d'une lettre substituable (insensible à la casse) a une
+// chance sur trois d'être remplacée (SUBSTITUTION_PROBABILITY). Une lettre doublée ("ss", "ll"…) est
+// traitée comme un seul bloc : soit tout est remplacé ("55"), soit rien.
+function applySubstitutions(text) {
+  return text.replace(/([easl])\1*/gi, (run) =>
+    Math.random() < SUBSTITUTION_PROBABILITY
+      ? LEET_SUBSTITUTIONS[run[0].toLowerCase()].repeat(run.length)
+      : run,
+  )
 }
 
 function computeBits(options) {
@@ -164,14 +156,12 @@ function computeBits(options) {
     permutations(wordData.prefixes.length, slots.prefixes) *
     permutations(wordData.suffixes.length, slots.suffixes)
 
-  // Chaque extra actif ne se contente plus d'une valeur fixe en fin de
-  // phrase : il choisit aussi une position parmi les segments × 2 côtés
-  // (avant/après), cf. attachRandomly(). Les deux tirages (valeur, position)
-  // sont indépendants, d'où la multiplication.
-  const positions = segmentCount(slots) * 2
-
-  if (digits) combinations *= wordData.numbers.length * positions
-  if (special) combinations *= SPECIAL_CHARS.length * positions
+  // Les extras sont à position fixe (fin de phrase) : seule leur valeur
+  // apporte de l'incertitude. Les substitutions leet ne sont volontairement
+  // pas comptées (leur apport dépend des lettres présentes) : l'estimation
+  // reste donc prudente.
+  if (digits) combinations *= wordData.numbers.length
+  if (special) combinations *= SPECIAL_CHARS.length
 
   return Math.log2(combinations)
 }
@@ -184,9 +174,8 @@ function computeBits(options) {
 //
 // Les paliers ne sont pas des fractions arbitraires de cette plage : chaque
 // option pèse un nombre de bits différent, et les chiffres/le caractère
-// spécial apportent désormais aussi l'entropie de leur position dans la
-// phrase (cf. computeBits), ce qui les rapproche du poids d'un mot plutôt
-// que de rester une poignée de bits fixes en fin de phrase. On calibre donc
+// spécial ne pèsent que quelques bits (position fixe en fin de phrase).
+// On calibre donc
 // les seuils "fort" et "très fort" sur des configurations concrètes plutôt
 // que sur des fractions uniformes.
 function computeBitsRange() {
