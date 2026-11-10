@@ -1,6 +1,5 @@
 const SPECIAL_CHARS = ["!", "?", "#", "%", "*", "+", "@"]
 const LEET_SUBSTITUTIONS = { e: "3", a: "4", l: "1", s: "5" }
-const SUBSTITUTION_PROBABILITY = 1 / 3
 const GAUGE_ARC_LENGTH = 157 // longueur du demi-cercle SVG (π × rayon 50)
 const FUN_FACT_INTERVAL_MS = 10000
 const HISTORY_STORAGE_KEY = "pass-history"
@@ -132,15 +131,18 @@ function buildPhrase(options) {
   return phrase + extras
 }
 
-// Chaque occurrence d'une lettre substituable (insensible à la casse) a une
-// chance sur trois d'être remplacée (SUBSTITUTION_PROBABILITY). Une lettre doublée ("ss", "ll"…) est
-// traitée comme un seul bloc : soit tout est remplacé ("55"), soit rien.
+// Une seule substitution par phrase : on choisit au hasard une occurrence
+// parmi les lettres substituables (insensible à la casse). Une lettre doublée
+// ("ss", "ll"…) compte comme une seule occurrence et est remplacée en bloc ("55").
 function applySubstitutions(text) {
-  return text.replace(/([easl])\1*/gi, (run) =>
-    Math.random() < SUBSTITUTION_PROBABILITY
-      ? LEET_SUBSTITUTIONS[run[0].toLowerCase()].repeat(run.length)
-      : run,
+  const runs = [...text.matchAll(/([easl])\1*/gi)]
+  if (runs.length === 0) return text
+
+  const { 0: run, index } = pickOne(runs)
+  const replacement = LEET_SUBSTITUTIONS[run[0].toLowerCase()].repeat(
+    run.length,
   )
+  return text.slice(0, index) + replacement + text.slice(index + run.length)
 }
 
 function computeBits(options) {
