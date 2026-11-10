@@ -33,6 +33,7 @@ const countInput = document.getElementById("countInput")
 const countLabel = document.getElementById("countLabel")
 const digitsInput = document.getElementById("digitsInput")
 const specialInput = document.getElementById("specialInput")
+const leetInput = document.getElementById("leetInput")
 const phraseDisplay = document.getElementById("phraseDisplay")
 const copyMainBtn = document.getElementById("copyMainBtn")
 const regenerateBtn = document.getElementById("regenerateBtn")
@@ -103,7 +104,7 @@ function pickCentralWord(options) {
 }
 
 function buildPhrase(options) {
-  const { count, digits, special, separator } = options
+  const { count, digits, special, leet, separator } = options
   const slots = SLOT_DISTRIBUTION[count]
 
   const word = pickCentralWord(options)
@@ -120,8 +121,9 @@ function buildPhrase(options) {
   if (slots.article) segments.push(pickOne(ARTICLES)[gender])
   segments.push(...prefixes, word.text, ...suffixes)
 
-  // Substitutions "leet" appliquées au hasard, avant l'ajout des extras.
-  const phrase = applySubstitutions(segments.join(separator))
+  // Substitution "leet" optionnelle, appliquée avant l'ajout des extras.
+  const joined = segments.join(separator)
+  const phrase = leet ? applySubstitutions(joined) : joined
 
   // Caractère spécial puis chiffre, toujours accolés en fin de phrase.
   const extras =
@@ -145,8 +147,30 @@ function applySubstitutions(text) {
   return text.slice(0, index) + replacement + text.slice(index + run.length)
 }
 
+// Nombre moyen d'occurrences substituables (cf. applySubstitutions) dans une
+// liste d'éléments, toutes formes confondues (masculin/féminin).
+function averageSubstitutableRuns(forms) {
+  const total = forms.reduce(
+    (sum, form) => sum + [...form.matchAll(/([easl])\1*/gi)].length,
+    0,
+  )
+  return total / forms.length
+}
+
+// Nombre moyen de positions candidates à la substitution leet pour une
+// distribution donnée : somme des moyennes de chaque segment de la phrase.
+function expectedSubstitutionPositions(slots) {
+  const genderForms = (list) => list.flatMap((item) => [item.m, item.f])
+  return (
+    (slots.article ? averageSubstitutableRuns(genderForms(ARTICLES)) : 0) +
+    slots.prefixes * averageSubstitutableRuns(genderForms(wordData.prefixes)) +
+    averageSubstitutableRuns(wordData.words.map((w) => w.text)) +
+    slots.suffixes * averageSubstitutableRuns(genderForms(wordData.suffixes))
+  )
+}
+
 function computeBits(options) {
-  const { count, digits, special } = options
+  const { count, digits, special, leet } = options
   const slots = SLOT_DISTRIBUTION[count]
 
   // Un mot personnalisé n'est pas tiré de wordData.words, mais on ne sait rien
@@ -159,11 +183,14 @@ function computeBits(options) {
     permutations(wordData.suffixes.length, slots.suffixes)
 
   // Les extras sont à position fixe (fin de phrase) : seule leur valeur
-  // apporte de l'incertitude. Les substitutions leet ne sont volontairement
-  // pas comptées (leur apport dépend des lettres présentes) : l'estimation
-  // reste donc prudente.
+  // apporte de l'incertitude.
   if (digits) combinations *= wordData.numbers.length
   if (special) combinations *= SPECIAL_CHARS.length
+
+  // La substitution leet porte sur une position tirée parmi les occurrences
+  // substituables de la phrase. Leur nombre dépend des mots tirés : on utilise
+  // donc une moyenne calculée sur les listes (estimation, pas une valeur exacte).
+  if (leet) combinations *= Math.max(expectedSubstitutionPositions(slots), 1)
 
   return Math.log2(combinations)
 }
@@ -182,7 +209,7 @@ function computeBits(options) {
 // que sur des fractions uniformes.
 function computeBitsRange() {
   const min = computeBits({ count: 2, digits: false, special: false })
-  const max = computeBits({ count: 4, digits: true, special: true })
+  const max = computeBits({ count: 4, digits: true, special: true, leet: true })
   const fortRef = computeBits({ count: 3, digits: true, special: true })
   const veryStrongRef = computeBits({ count: 4, digits: true, special: false })
   const span = max - min
@@ -289,6 +316,7 @@ function readOptions() {
     count: Number(countInput.value),
     digits: digitsInput.checked,
     special: specialInput.checked,
+    leet: leetInput.checked,
     customWord: customWordInput.value.trim(),
     customGender,
     separator,
@@ -482,6 +510,7 @@ countInput.addEventListener("input", () => {
 })
 digitsInput.addEventListener("change", generateAll)
 specialInput.addEventListener("change", generateAll)
+leetInput.addEventListener("change", generateAll)
 customWordInput.addEventListener("input", generateAll)
 customGenderRadios.forEach((r) => r.addEventListener("change", generateAll))
 separatorRadios.forEach((r) => r.addEventListener("change", generateAll))
