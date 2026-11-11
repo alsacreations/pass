@@ -871,6 +871,93 @@ input[type="text"]:focus {
   }
 }
 
+/* Téléchargement de la présentation */
+.download {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 16px 20px;
+  margin-top: 24px;
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  color: #fff;
+
+  @media (width >= 48rem) {
+    grid-template-columns: auto 1fr auto;
+    gap: 24px;
+  }
+}
+
+.download-icon {
+  width: 48px;
+  height: auto;
+  color: #fff;
+
+  @media (width >= 48rem) {
+    width: 56px;
+  }
+}
+
+.download-title {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.download-text p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.download-btn {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  color: var(--accent-dark);
+  text-decoration: none;
+  white-space: normal;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.18);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+
+  @media (width >= 48rem) {
+    grid-column: auto;
+  }
+}
+
+.download-btn svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+}
+
+.download-btn:hover {
+  background: #f5f3ff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.22);
+}
+
+.download-btn:active {
+  transform: scale(0.97);
+}
+
+.download-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.download-meta {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
 /* Footer */
 .footer {
   margin-top: 40px;

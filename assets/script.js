@@ -550,7 +550,7 @@ prefersReducedMotion.addEventListener("change", (e) =>
   e.matches ? stopAutoRotate() : startAutoRotate(),
 )
 
-fetch("words.json")
+fetch("assets/words.json")
   .then((res) => res.json())
   .then((data) => {
     wordData = data
@@ -558,7 +558,7 @@ fetch("words.json")
     generateAll()
   })
 
-fetch("funfacts.json")
+fetch("assets/funfacts.json")
   .then((res) => res.json())
   .then((data) => {
     funFacts = data.facts

@@ -15,11 +15,11 @@
 
     <link
       rel="icon"
-      href="favicon.svg"
+      href="assets/favicon.svg"
       type="image/svg+xml" />
     <link
       rel="mask-icon"
-      href="favicon.svg"
+      href="assets/favicon.svg"
       color="#6c5ce7" />
     <meta
       name="theme-color"
@@ -42,7 +42,7 @@
       content="fr_FR" />
     <meta
       property="og:image"
-      content="https://pass.alsacreations.com/og-image.png" />
+      content="https://pass.alsacreations.com/assets/og-image.png" />
     <meta
       property="og:image:width"
       content="1200" />
@@ -63,11 +63,11 @@
       content="Créez des mots de passe robustes et mémorisables en un clic." />
     <meta
       name="twitter:image"
-      content="https://pass.alsacreations.com/og-image.png" />
+      content="https://pass.alsacreations.com/assets/og-image.png" />
 
     <link
       rel="stylesheet"
-      href="styles.css" />
+      href="assets/styles.css" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -406,6 +406,71 @@
           </button>
         </div>
       </section>
+
+      <section
+        class="card download"
+        aria-labelledby="downloadTitle">
+        <svg
+          class="download-icon"
+          viewBox="0 0 48 56"
+          fill="none"
+          aria-hidden="true">
+          <path
+            d="M6 2h26l14 14v34a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4Z"
+            fill="currentColor"
+            opacity=".18" />
+          <path
+            d="M32 2v10a4 4 0 0 0 4 4h10"
+            fill="currentColor"
+            opacity=".35" />
+          <path
+            d="M6 2h26l14 14v34a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4Z"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linejoin="round" />
+          <text
+            x="24"
+            y="42"
+            text-anchor="middle"
+            fill="currentColor"
+            font-size="12"
+            font-weight="800"
+            font-family="system-ui, sans-serif">
+            PDF
+          </text>
+        </svg>
+        <div class="download-text">
+          <h2
+            id="downloadTitle"
+            class="download-title">
+            Envie d'aller plus loin&#8239;?
+          </h2>
+          <p>
+            Retrouvez toutes nos recommandations sur les mots de passe dans
+            notre présentation, à consulter ou à partager.
+          </p>
+        </div>
+        <a
+          class="btn download-btn"
+          href="assets/mots-de-passe.pdf"
+          download>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true">
+            <path
+              d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          <span>
+            Télécharger la présentation
+            <span class="download-meta">PDF, 886&nbsp;ko</span>
+          </span>
+        </a>
+      </section>
     </main>
 
     <footer
@@ -467,6 +532,6 @@
       </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="assets/script.js"></script>
   </body>
 </html>

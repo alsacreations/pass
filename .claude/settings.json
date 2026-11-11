@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(node -e ' *)",
-      "Bash(node --check /Users/raphael/Git/pass/script.js)"
+      "Bash(node --check /Users/raphael/Git/pass/assets/script.js)"
     ]
   }
 }
