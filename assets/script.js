@@ -255,13 +255,10 @@ function computeBits(options) {
   return Math.log2(combinations)
 }
 
-// Scénario de référence : un pirate essaie de se connecter au compte en
-// enchaînant les tentatives, en connaissant ce générateur et ses listes
-// (elles sont publiques). 10 essais par seconde, c'est un site qui ne limite
-// pas les tentatives (même hypothèse que l'outil zxcvbn) ; la plupart des
-// sites ralentissent bien davantage. Le vol d'une base de données, plus rare
-// mais bien plus rapide, est expliqué dans la FAQ.
-const GUESSES_PER_SECOND = 10
+// La jauge n'affiche pas de durée : elle varierait d'un facteur 10 000 selon
+// le scénario (attaque en ligne ou vol de la base de données d'un site).
+// La comparaison avec un mot de passe moyen, elle, reste vraie quel que soit
+// le rythme de l'attaquant.
 
 // Ordre de grandeur de la difficulté à deviner un mot de passe « moyen »
 // choisi par un humain (prénom + année, mot du dictionnaire + chiffre…) :
@@ -269,43 +266,37 @@ const GUESSES_PER_SECOND = 10
 // soit environ un million d'essais.
 const TYPICAL_PASSWORD_BITS = 20
 
-// En moyenne, il faut parcourir la moitié des combinaisons pour tomber juste.
-function crackSeconds(bits) {
-  return 2 ** (bits - 1) / GUESSES_PER_SECOND
-}
-
-const DURATION_UNITS = [
-  { seconds: 365.25 * 86400, singular: "an", plural: "ans" },
-  { seconds: 30.44 * 86400, singular: "mois", plural: "mois" },
-  { seconds: 86400, singular: "jour", plural: "jours" },
-  { seconds: 3600, singular: "heure", plural: "heures" },
-  { seconds: 60, singular: "minute", plural: "minutes" },
-  { seconds: 1, singular: "seconde", plural: "secondes" },
-]
-
-function formatDuration(seconds) {
-  if (seconds < 1) return "moins d’une seconde"
-  const years = seconds / DURATION_UNITS[0].seconds
-  if (years >= 1e6) return "plus d’un million d’années"
-
-  const unit = DURATION_UNITS.find((u) => seconds >= u.seconds)
-  const value = seconds / unit.seconds
-  // Deux chiffres significatifs suffisent : c'est un ordre de grandeur.
-  const rounded = Number(value.toPrecision(value < 10 ? 1 : 2))
-  const label = rounded > 1 ? unit.plural : unit.singular
-  return `environ ${rounded.toLocaleString("fr-FR")} ${label}`
-}
-
 // Niveaux en bits d'entropie, calés sur les mots de passe réels plutôt que
 // sur un idéal : « vulnérable » correspond à un mot de passe moyen, « fort »
 // à une pass-phrase de 4 mots, « très fort » à ce que l'on recommande
 // pour les comptes importants (messagerie, banque, gestionnaire…).
 const LEVELS = [
-  { label: "vulnérable", color: "#7b241c" },
-  { label: "faible", color: "#c0392b" },
-  { label: "moyen", color: "#a15b0a" },
-  { label: "fort", color: "#1c7a43" },
-  { label: "très fort", color: "#1e8449" },
+  {
+    label: "vulnérable",
+    color: "#7b241c",
+    advice: "Ajoutez un mot pour la rendre bien plus solide.",
+  },
+  {
+    label: "faible",
+    color: "#c0392b",
+    advice: "Ajoutez un mot pour la rendre bien plus solide.",
+  },
+  {
+    label: "moyen",
+    color: "#a15b0a",
+    advice: "Suffisant pour un compte sans importance. Un mot de plus&#8239;?",
+  },
+  {
+    label: "fort",
+    color: "#1c7a43",
+    advice:
+      "Idéal au quotidien. Pour la messagerie ou la banque, ajoutez un mot.",
+  },
+  {
+    label: "très fort",
+    color: "#1e8449",
+    advice: "Parfait, même pour vos comptes les plus importants.",
+  },
 ]
 const LEVEL_BOUNDS = [15, 21, 25, 28, 35, 45]
 
@@ -385,9 +376,9 @@ function generateAll() {
   updateGauge(bits)
   const comparison = formatComparison(bits)
   const versus = comparison
-    ? `C’est <strong>${comparison} plus difficile</strong> à deviner qu’un mot de passe moyen.`
-    : "C’est aussi facile à deviner qu’un mot de passe moyen."
-  strengthTime.innerHTML = `${versus}<br>Un pirate qui l’essaierait en ligne mettrait ${formatDuration(crackSeconds(bits))} à la trouver.<br><strong>Attention&#8239;: aucun mot de passe n'est inviolable&#8239;!</strong>`
+    ? `C’est <strong>${comparison} plus difficile</strong> à deviner qu’un mot de passe moyen comme «&nbsp;Patrick1965&nbsp;».`
+    : "Ce n’est <strong>pas plus sûr</strong> qu’un mot de passe moyen comme «&nbsp;Patrick1965&nbsp;»."
+  strengthTime.innerHTML = `${versus}<br>${strengthLevel(bits).advice}<br><strong>Attention&#8239;: aucun mot de passe n'est inviolable&#8239;!</strong>`
 }
 
 function renderFunFact(index) {
