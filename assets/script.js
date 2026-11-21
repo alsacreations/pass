@@ -2,7 +2,9 @@ const SPECIAL_CHARS = ["!", "?", "#", "%", "*", "+", "@"]
 const LEET_SUBSTITUTIONS = { e: "3", a: "4", l: "1", s: "5" }
 const GAUGE_ARC_LENGTH = 157 // longueur du demi-cercle SVG (π × rayon 50)
 const FUN_FACT_INTERVAL_MS = 10000
-const HISTORY_STORAGE_KEY = "pass-history"
+// Ancienne clé de l'historique persistant : on la purge au chargement pour
+// effacer les pass-phrases laissées par les versions précédentes de l'outil.
+const LEGACY_HISTORY_STORAGE_KEY = "pass-history"
 const MAX_HISTORY = 10
 // Les changements d'options régénèrent la phrase à chaque frappe/glissement
 // de curseur ; on n'enregistre l'entrée d'historique qu'une fois que
@@ -20,13 +22,42 @@ const ARTICLES = [
   { m: "Ton", f: "Ta" },
 ]
 
-// Le compteur "nombre de mots" (2-4) inclut l'article et le préfixe quand ils
+// Devant un nom commençant par une voyelle ou un h muet : « L'Éléphant »,
+// « Mon Armoire », « Bel Hippopotame »… Le h aspiré (« Le Hibou ») est le cas
+// par défaut, donc seuls les noms en h muet des listes sont recensés ici.
+// Les préfixes commencent tous par une consonne : l'article placé devant
+// un préfixe ne change jamais.
+// Le y initial se comporte comme une consonne : « Le Yaourt », « La Yourte ».
+const STARTS_WITH_VOWEL = /^[aàâäeéèêëiîïoôöuùûü]/i
+const H_MUET = new Set([
+  "harmonica",
+  "hélicoptère",
+  "hippocampe",
+  "hippopotame",
+  "hortensia",
+  "huître",
+])
+const ELIDED_ARTICLES = { Le: "L'", La: "L'", Ma: "Mon", Ta: "Ton" }
+const ELIDED_PREFIXES = {
+  Beau: "Bel",
+  Fou: "Fol",
+  Vieux: "Vieil",
+  Nouveau: "Nouvel",
+}
+
+function startsWithVowelSound(text) {
+  return STARTS_WITH_VOWEL.test(text) || H_MUET.has(text.toLowerCase())
+}
+
+// Le compteur "nombre de mots" (2-6) inclut l'article et le préfixe quand ils
 // sont présents, d'où le décalage par rapport aux slots préfixes/suffixes.
 // Il n'y a jamais plus d'un préfixe : les mots supplémentaires vont tous en suffixes.
 const SLOT_DISTRIBUTION = {
   2: { article: false, prefixes: 0, suffixes: 1 },
   3: { article: true, prefixes: 0, suffixes: 1 },
   4: { article: true, prefixes: 1, suffixes: 1 },
+  5: { article: true, prefixes: 1, suffixes: 2 },
+  6: { article: true, prefixes: 1, suffixes: 3 },
 }
 
 const countInput = document.getElementById("countInput")
@@ -63,22 +94,43 @@ const prefersReducedMotion = window.matchMedia(
 )
 
 let wordData = null
-let bitsRange = { min: 0, max: 1 }
 
 let funFacts = []
 let funFactIndex = 0
 let funFactTimer = null
 
-let history = loadHistory()
+// L'historique ne vit qu'en mémoire, le temps de l'onglet : rien n'est écrit
+// dans le navigateur ni envoyé où que ce soit. Fermer l'onglet l'efface.
+let history = []
 let historyDebounceTimer = null
 
-function pickOne(list) {
-  return list[Math.floor(Math.random() * list.length)]
+purgeLegacyHistory()
+
+// Entier aléatoire uniforme dans [0, max), tiré par le générateur
+// cryptographique du navigateur (Math.random n'est pas fait pour des secrets).
+// Le rejet des valeurs hautes évite le biais du modulo.
+function randomInt(max) {
+  const limit = Math.floor(0x100000000 / max) * max
+  const buffer = new Uint32Array(1)
+  do {
+    crypto.getRandomValues(buffer)
+  } while (buffer[0] >= limit)
+  return buffer[0] % max
 }
 
+function pickOne(list) {
+  return list[randomInt(list.length)]
+}
+
+// Mélange de Fisher-Yates partiel : seuls les `count` premiers éléments sont
+// tirés, chacun uniformément parmi ceux qui restent.
 function pickDistinct(list, count) {
-  const shuffled = [...list].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, count)
+  const pool = [...list]
+  for (let i = 0; i < count; i++) {
+    const j = i + randomInt(pool.length - i)
+    ;[pool[i], pool[j]] = [pool[j], pool[i]]
+  }
+  return pool.slice(0, count)
 }
 
 function permutations(n, r) {
@@ -110,19 +162,27 @@ function buildPhrase(options) {
   const word = pickCentralWord(options)
   const gender = word.gender
 
-  const prefixes = pickDistinct(wordData.prefixes, slots.prefixes).map(
-    (p) => p[gender],
+  const prefixes = pickDistinct(wordData.prefixes, slots.prefixes).map((p) =>
+    gender === "m" && ELIDED_PREFIXES[p.m] && startsWithVowelSound(word.text)
+      ? ELIDED_PREFIXES[p.m]
+      : p[gender],
   )
   const suffixes = pickDistinct(wordData.suffixes, slots.suffixes).map(
     (s) => s[gender],
   )
 
-  const segments = []
-  if (slots.article) segments.push(pickOne(ARTICLES)[gender])
-  segments.push(...prefixes, word.text, ...suffixes)
+  const body = [...prefixes, word.text, ...suffixes].join(separator)
+  let joined = body
+  if (slots.article) {
+    const article = pickOne(ARTICLES)[gender]
+    const elided = startsWithVowelSound(prefixes[0] ?? word.text)
+      ? (ELIDED_ARTICLES[article] ?? article)
+      : article
+    // « L' » se colle au mot suivant, sans séparateur.
+    joined = elided.endsWith("'") ? elided + body : elided + separator + body
+  }
 
   // Substitution "leet" optionnelle, appliquée avant l'ajout des extras.
-  const joined = segments.join(separator)
   const phrase = leet ? applySubstitutions(joined) : joined
 
   // Caractère spécial puis chiffre, toujours accolés en fin de phrase.
@@ -170,15 +230,15 @@ function expectedSubstitutionPositions(slots) {
 }
 
 function computeBits(options) {
-  const { count, digits, special, leet } = options
+  const { count, digits, special, leet, customWord } = options
   const slots = SLOT_DISTRIBUTION[count]
 
-  // Un mot personnalisé n'est pas tiré de wordData.words, mais on ne sait rien
-  // de sa nature (mot commun ou chaîne aléatoire) : il apporte donc la même
-  // incertitude qu'un tirage dans la liste, ni plus ni moins.
+  // Un mot personnalisé est choisi par l'utilisateur, souvent en lien avec
+  // le site ou avec lui-même : on le considère comme connu de l'attaquant et
+  // il n'apporte donc aucune incertitude.
   let combinations =
     (slots.article ? ARTICLES.length : 1) *
-    wordData.words.length *
+    (customWord ? 1 : wordData.words.length) *
     permutations(wordData.prefixes.length, slots.prefixes) *
     permutations(wordData.suffixes.length, slots.suffixes)
 
@@ -195,107 +255,98 @@ function computeBits(options) {
   return Math.log2(combinations)
 }
 
-// La plage de bits réellement atteignable dépend de la taille des listes
-// chargées (échantillon aujourd'hui, vraies listes ensuite). On calibre donc
-// la jauge entre le pire cas (2 mots, sans options) et le meilleur cas
-// (4 mots, chiffres + caractère spécial) plutôt que sur des seuils de bits
-// fixes, sinon la jauge peut plafonner artificiellement avec de petites listes.
-//
-// Les paliers ne sont pas des fractions arbitraires de cette plage : chaque
-// option pèse un nombre de bits différent, et les chiffres/le caractère
-// spécial ne pèsent que quelques bits (position fixe en fin de phrase).
-// On calibre donc
-// les seuils "fort" et "très fort" sur des configurations concrètes plutôt
-// que sur des fractions uniformes.
-function computeBitsRange() {
-  const min = computeBits({ count: 2, digits: false, special: false })
-  const max = computeBits({ count: 4, digits: true, special: true, leet: true })
-  const fortRef = computeBits({ count: 3, digits: true, special: true })
-  const veryStrongRef = computeBits({ count: 4, digits: true, special: false })
-  const span = max - min
-  const moyenThreshold = (fortRef - min) / span / 2
+// Scénario de référence : un pirate essaie de se connecter au compte en
+// enchaînant les tentatives, en connaissant ce générateur et ses listes
+// (elles sont publiques). 10 essais par seconde, c'est un site qui ne limite
+// pas les tentatives (même hypothèse que l'outil zxcvbn) ; la plupart des
+// sites ralentissent bien davantage. Le vol d'une base de données, plus rare
+// mais bien plus rapide, est expliqué dans la FAQ.
+const GUESSES_PER_SECOND = 10
 
-  return {
-    min,
-    max,
-    vulnerableThreshold: moyenThreshold / 2,
-    moyenThreshold,
-    fortThreshold: (fortRef - min) / span,
-    veryStrongThreshold: (veryStrongRef - min) / span,
-  }
+// Ordre de grandeur de la difficulté à deviner un mot de passe « moyen »
+// choisi par un humain (prénom + année, mot du dictionnaire + chiffre…) :
+// les études sur les fuites de mots de passe l'estiment autour de 20 bits,
+// soit environ un million d'essais.
+const TYPICAL_PASSWORD_BITS = 20
+
+// En moyenne, il faut parcourir la moitié des combinaisons pour tomber juste.
+function crackSeconds(bits) {
+  return 2 ** (bits - 1) / GUESSES_PER_SECOND
 }
 
-function computeStrength(options) {
-  const bits = computeBits(options)
-  const span = bitsRange.max - bitsRange.min
-  const percent =
-    span > 0 ? Math.min(Math.max((bits - bitsRange.min) / span, 0), 1) : 1
-
-  return { percent, timeLabel: formatCrackTime(percent) }
-}
-
-const LEVELS = [
-  { label: "vulnérable", color: "#7b241c", crackTime: "moins d’une seconde" },
-  { label: "faible", color: "#c0392b", crackTime: "quelques secondes" },
-  { label: "moyen", color: "#a15b0a", crackTime: "quelques jours" },
-  { label: "fort", color: "#1c7a43", crackTime: "quelques années" },
-  { label: "très fort", color: "#1e8449", crackTime: "des milliers d’années" },
+const DURATION_UNITS = [
+  { seconds: 365.25 * 86400, singular: "an", plural: "ans" },
+  { seconds: 30.44 * 86400, singular: "mois", plural: "mois" },
+  { seconds: 86400, singular: "jour", plural: "jours" },
+  { seconds: 3600, singular: "heure", plural: "heures" },
+  { seconds: 60, singular: "minute", plural: "minutes" },
+  { seconds: 1, singular: "seconde", plural: "secondes" },
 ]
 
-// Bornes séparant les 5 niveaux ci-dessus, alignées sur computeBitsRange().
-function levelBounds() {
-  return [
-    0,
-    bitsRange.vulnerableThreshold,
-    bitsRange.moyenThreshold,
-    bitsRange.fortThreshold,
-    bitsRange.veryStrongThreshold,
-    1,
-  ]
+function formatDuration(seconds) {
+  if (seconds < 1) return "moins d’une seconde"
+  const years = seconds / DURATION_UNITS[0].seconds
+  if (years >= 1e6) return "plus d’un million d’années"
+
+  const unit = DURATION_UNITS.find((u) => seconds >= u.seconds)
+  const value = seconds / unit.seconds
+  // Deux chiffres significatifs suffisent : c'est un ordre de grandeur.
+  const rounded = Number(value.toPrecision(value < 10 ? 1 : 2))
+  const label = rounded > 1 ? unit.plural : unit.singular
+  return `environ ${rounded.toLocaleString("fr-FR")} ${label}`
 }
 
-// Paliers alignés sur strengthLevel() : une estimation simplifiée relative à
-// la plage min/max atteignable avec les listes chargées, pas une vraie mesure
-// d'entropie cryptographique, pour que le libellé de temps et le niveau de
-// sécurité racontent toujours la même histoire.
-function formatCrackTime(percent) {
-  return strengthLevel(percent).crackTime
-}
+// Niveaux en bits d'entropie, calés sur les mots de passe réels plutôt que
+// sur un idéal : « vulnérable » correspond à un mot de passe moyen, « fort »
+// à une pass-phrase de 4 mots, « très fort » à ce que l'on recommande
+// pour les comptes importants (messagerie, banque, gestionnaire…).
+const LEVELS = [
+  { label: "vulnérable", color: "#7b241c" },
+  { label: "faible", color: "#c0392b" },
+  { label: "moyen", color: "#a15b0a" },
+  { label: "fort", color: "#1c7a43" },
+  { label: "très fort", color: "#1e8449" },
+]
+const LEVEL_BOUNDS = [15, 21, 25, 28, 35, 45]
 
-function strengthLevel(percent) {
-  const bounds = levelBounds()
-  const index = bounds.slice(1, -1).findIndex((bound) => percent < bound)
+function strengthLevel(bits) {
+  const index = LEVEL_BOUNDS.slice(1, -1).findIndex((bound) => bits < bound)
   return LEVELS[index === -1 ? LEVELS.length - 1 : index]
 }
 
-// Les seuils entre niveaux ne sont pas équidistants (un mot de plus pèse plus
-// que l'ajout des chiffres/spécial, voir computeBitsRange), donc utiliser le
-// pourcentage brut pour le remplissage de la jauge écrase visuellement les
-// niveaux les uns contre les autres. On répartit donc chaque niveau sur une
-// tranche égale de la jauge (1/5 chacun), en interpolant la position à
-// l'intérieur de la tranche pour garder un retour visuel continu.
-function computeVisualPercent(percent) {
-  const bounds = levelBounds()
-  const segments = bounds.length - 1
+// Combien de fois plus d'essais qu'un mot de passe moyen, en toutes lettres
+// au-delà du million pour rester lisible.
+function formatComparison(bits) {
+  const ratio = 2 ** (bits - TYPICAL_PASSWORD_BITS)
+  if (ratio < 2) return null
+  if (ratio >= 1e9) return "des milliards de fois"
+  if (ratio >= 1e6) return "des millions de fois"
+  const rounded = Number(ratio.toPrecision(ratio < 100 ? 1 : 2))
+  return `${rounded.toLocaleString("fr-FR")} fois`
+}
 
+// Chaque niveau occupe une tranche égale de la jauge (1/5), en interpolant
+// la position à l'intérieur de la tranche pour garder un retour continu.
+function computeVisualPercent(bits) {
+  const segments = LEVEL_BOUNDS.length - 1
   for (let i = 0; i < segments; i++) {
-    const start = bounds[i]
-    const end = bounds[i + 1]
-    if (percent < end || i === segments - 1) {
-      const localRatio = end > start ? (percent - start) / (end - start) : 0
+    const start = LEVEL_BOUNDS[i]
+    const end = LEVEL_BOUNDS[i + 1]
+    if (bits < end || i === segments - 1) {
+      const localRatio = (bits - start) / (end - start)
       return (i + Math.min(Math.max(localRatio, 0), 1)) / segments
     }
   }
   return 1
 }
 
-function updateGauge(percent) {
-  const level = strengthLevel(percent)
-  const visualPercent = computeVisualPercent(percent)
+function updateGauge(bits) {
+  const level = strengthLevel(bits)
+  const visualPercent = computeVisualPercent(bits)
   // stroke-linecap: round dessine un point même pour un tracé de longueur
   // nulle ; à 0 % on masque donc entièrement le remplissage plutôt que de
   // laisser ce point parasite s'afficher sur le tracé.
-  gaugeFill.style.opacity = percent > 0 ? "1" : "0"
+  gaugeFill.style.opacity = visualPercent > 0 ? "1" : "0"
   gaugeFill.style.strokeDashoffset = String(
     GAUGE_ARC_LENGTH * (1 - visualPercent),
   )
@@ -330,9 +381,13 @@ function generateAll() {
   phraseDisplay.textContent = phrase
   scheduleHistoryEntry(phrase)
 
-  const { percent, timeLabel } = computeStrength(options)
-  updateGauge(percent)
-  strengthTime.innerHTML = `Il faudrait <strong>${timeLabel}</strong> pour deviner ce mot de passe.<br><strong>Attention&#8239;: aucun mot de passe n'est inviolable&#8239;!</strong>`
+  const bits = computeBits(options)
+  updateGauge(bits)
+  const comparison = formatComparison(bits)
+  const versus = comparison
+    ? `C’est <strong>${comparison} plus difficile</strong> à deviner qu’un mot de passe moyen.`
+    : "C’est aussi facile à deviner qu’un mot de passe moyen."
+  strengthTime.innerHTML = `${versus}<br>Un pirate qui l’essaierait en ligne mettrait ${formatDuration(crackSeconds(bits))} à la trouver.<br><strong>Attention&#8239;: aucun mot de passe n'est inviolable&#8239;!</strong>`
 }
 
 function renderFunFact(index) {
@@ -394,20 +449,11 @@ function restartAutoRotate() {
   startAutoRotate()
 }
 
-function loadHistory() {
+function purgeLegacyHistory() {
   try {
-    const raw = localStorage.getItem(HISTORY_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
+    localStorage.removeItem(LEGACY_HISTORY_STORAGE_KEY)
   } catch {
-    return []
-  }
-}
-
-function saveHistory() {
-  try {
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history))
-  } catch {
-    // stockage indisponible (navigation privée, quota dépassé...) : on continue sans persister
+    // stockage indisponible (navigation privée, site bloqué…) : rien à purger
   }
 }
 
@@ -433,7 +479,6 @@ function addHistoryEntry(phrase) {
 
   history.unshift({ phrase, timestamp: Date.now() })
   history = history.slice(0, MAX_HISTORY)
-  saveHistory()
   if (historyDialog.open) renderHistoryList()
 }
 
@@ -447,13 +492,11 @@ function scheduleHistoryEntry(phrase) {
 
 function deleteHistoryEntry(index) {
   history.splice(index, 1)
-  saveHistory()
   renderHistoryList()
 }
 
 function clearHistory() {
   history = []
-  saveHistory()
   renderHistoryList()
 }
 
@@ -554,7 +597,6 @@ fetch("assets/words.json")
   .then((res) => res.json())
   .then((data) => {
     wordData = data
-    bitsRange = computeBitsRange()
     generateAll()
   })
 

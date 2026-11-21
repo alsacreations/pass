@@ -117,6 +117,10 @@
           Chiffres, caractères spéciaux, mot personnalisé&#8239;: à vous de
           choisir&#8239;!
         </p>
+        <p class="privacy-note">
+          Le tirage a lieu dans votre navigateur&#8239;: la pass-phrase n’est ni
+          envoyée, ni enregistrée. Fermer l’onglet l’efface.
+        </p>
       </header>
 
       <section class="card main-phrase">
@@ -201,6 +205,11 @@
           Aucune pass-phrase générée pour l'instant.
         </p>
 
+        <p class="history-note">
+          Cet historique n’existe que dans cet onglet&#8239;: il n’est
+          enregistré nulle part et disparaît à sa fermeture.
+        </p>
+
         <div class="history-dialog-footer">
           <button
             class="btn btn-outline"
@@ -219,14 +228,14 @@
             <label
               class="label-row"
               for="countInput">
-              <span id="countLabel">3 mots</span>
+              <span id="countLabel">4 mots</span>
             </label>
             <input
               type="range"
               id="countInput"
               min="2"
-              max="4"
-              value="3"
+              max="6"
+              value="4"
               step="1" />
           </div>
 
@@ -243,8 +252,7 @@
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                id="specialInput"
-                checked />
+                id="specialInput" />
               <span>Caractère spécial</span>
             </label>
           </div>
@@ -253,8 +261,7 @@
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                id="leetInput"
-                checked />
+                id="leetInput" />
               <span>Remplacer une lettre par un chiffre</span>
             </label>
           </div>
@@ -296,7 +303,8 @@
               <label
                 class="label-row"
                 for="customWordInput"
-                >Mot personnalisé (conseillé pour donner du contexte)</label
+                >Mot personnalisé (facultatif, il n’ajoute pas de
+                sécurité)</label
               >
               <input
                 type="text"
@@ -470,6 +478,112 @@
             <span class="download-meta">PDF, 1.1&nbsp;mo</span>
           </span>
         </a>
+      </section>
+
+      <section
+        class="card faq"
+        aria-labelledby="faqTitle">
+        <h2 id="faqTitle">Questions fréquentes</h2>
+
+        <details class="faq-item">
+          <summary>Qu’est-ce qu’une pass-phrase&#8239;?</summary>
+          <p>
+            C’est un mot de passe formé de plusieurs mots, comme une courte
+            phrase. Elle est plus longue qu’un mot de passe classique, donc plus
+            difficile à deviner, tout en restant facile à retenir.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Mes pass-phrases sont-elles enregistrées&#8239;?</summary>
+          <p>
+            Non. Le tirage a lieu dans votre navigateur, après le chargement de
+            la page. La pass-phrase n’est envoyée à aucun serveur et n’est pas
+            écrite dans l’adresse. L’historique n’existe que dans l’onglet
+            ouvert&#8239;: le fermer l’efface.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Le tirage est-il vraiment aléatoire&#8239;?</summary>
+          <p>
+            Oui. Les mots sont tirés avec le générateur cryptographique du
+            navigateur (<code>crypto.getRandomValues</code>), conçu pour
+            produire des secrets. Chaque mot de la liste a exactement la même
+            chance d’être choisi.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Puis-je utiliser mon propre mot&#8239;?</summary>
+          <p>
+            Oui, via les options avancées, par exemple pour vous rappeler à quel
+            site sert la pass-phrase. Ce mot ne compte pas dans le niveau de
+            sécurité&#8239;: vous l’avez choisi, on part donc du principe qu’un
+            attaquant peut le deviner. Évitez surtout les informations faciles à
+            trouver sur vous (prénom, animal, ville, date de naissance…).
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Comment est calculé le niveau de sécurité&#8239;?</summary>
+          <p>
+            On compte toutes les pass-phrases que l’outil peut produire avec vos
+            réglages. Les listes de mots sont publiques&#8239;: on suppose donc
+            que l’attaquant les connaît et les essaie toutes.
+          </p>
+          <p>
+            La durée affichée correspond au cas le plus courant&#8239;: un
+            pirate qui essaie de se connecter à votre compte, à raison de 10
+            essais par seconde. La plupart des sites ralentissent ou bloquent
+            bien avant, ce qui rend la pass-phrase encore plus solide.
+          </p>
+          <p>
+            La comparaison se fait avec un mot de passe moyen choisi par un
+            humain (prénom, date, mot du dictionnaire…), qu’un pirate trouve en
+            environ un million d’essais.
+          </p>
+          <p>
+            Dans un cas plus rare, la base de données d’un site est
+            volée&#8239;: le pirate peut alors faire des millions d’essais par
+            seconde. Pour vos comptes les plus importants (messagerie, banque,
+            gestionnaire de mots de passe), visez donc 5 ou 6 mots.
+          </p>
+          <p>
+            Le moyen le plus efficace pour monter en sécurité&#8239;: ajouter
+            des mots.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            Les chiffres et caractères spéciaux sont-ils utiles&#8239;?
+          </summary>
+          <p>
+            Ils renforcent un peu la pass-phrase, mais ajouter un mot a bien
+            plus d’effet. Activez-les surtout quand un site les exige.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Comment conserver mes pass-phrases&#8239;?</summary>
+          <p>
+            Utilisez une pass-phrase différente pour chaque site, puis notez-les
+            là où cela vous convient le mieux.
+          </p>
+          <p>
+            Un carnet papier, gardé chez vous, est une solution tout à fait
+            valable&#8239;: aucun pirate ne peut le lire à distance. Ne le
+            laissez simplement pas traîner à côté de l’ordinateur ni dans votre
+            sac.
+          </p>
+          <p>
+            Un gestionnaire de mots de passe (Bitwarden, KeePassXC, celui de
+            votre navigateur…) vous suit sur tous vos appareils et remplit les
+            formulaires à votre place. Vous n’avez alors qu’une seule
+            pass-phrase à retenir&#8239;: celle qui le protège.
+          </p>
+        </details>
       </section>
     </main>
 

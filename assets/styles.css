@@ -496,6 +496,13 @@ h2 {
   font-size: 0.9rem;
 }
 
+.privacy-note {
+  max-width: 65ch;
+  margin: 8px auto 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 .page-header .subtitle {
   margin-bottom: 0;
   font-size: 1rem;
@@ -774,6 +781,43 @@ input[type="text"]:focus {
 
 .strength-time strong {
   margin-top: 4px;
+}
+
+.faq {
+  margin-top: 24px;
+}
+
+.faq-item {
+  border-top: 1px solid var(--border);
+}
+
+.faq-item:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-item summary {
+  padding: 14px 0;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.faq-item summary:hover,
+.faq-item[open] summary {
+  color: var(--accent-dark);
+}
+
+.faq-item summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.faq-item p {
+  max-width: 65ch;
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .fun-fact {
@@ -1170,6 +1214,13 @@ input[type="text"]:focus {
 .history-empty {
   margin: 12px 0;
   color: var(--muted);
+  text-align: center;
+}
+
+.history-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
   text-align: center;
 }
 
